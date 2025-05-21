@@ -26,7 +26,7 @@ def main():
     print("Found %d judges" % len(all_judges))
 
     print("Creating rubric judge")
-    new_judge_id = 'my_cool_judge'
+    new_judge_id = 'my_cool_judge_id'
     rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     judge_model = "openai/openai/gpt-4o"
     new_judge = back.judges.create_rubric_judge(new_judge_id,

@@ -56,9 +56,14 @@ class JudgesClient:
             "min_score": min_score,
             "max_score": max_score,
         }
-        for optional_field in ("prescript", "postscript", "extract_variables", "extract_judgement"):
-            if locals()[optional_field] is not None:
-                judge_spec[optional_field] = locals()[optional_field]
+        for field, value in (
+                ("prescript", prescript),
+                ("postscript", postscript),
+                ("extract_variables", extract_variables),
+                ("extract_judgement", extract_judgement)
+        ):
+            if value is not None:
+                judge_spec[field] = value
         return self.create_judge(judge_id, judge_spec, description)
 
     def list(self) -> list[Judge]:
