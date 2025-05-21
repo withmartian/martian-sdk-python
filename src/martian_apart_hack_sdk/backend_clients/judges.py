@@ -7,17 +7,27 @@ class JudgesClient:
         self._backend = backend
 
     # C
-    # def create(self, rubrics, llm) -> "Judge": …
+    def create_rubric_judge(self, rubrics, llm) -> Judge:
+        pass
 
-    # R
-    # def list(self, *, limit=100, cursor=None) -> list["Judge"]:
-    #     resp = self._client.get("/judges", params=dict(limit=limit, cursor=cursor))
-    #     return [Judge(**j, _http=self._client) for j in resp.json()["items"]]
+    def list(self) -> list[Judge]:
+        resp = self._httpx.get("/judges")
+        return [self._init_judge(j) for j in resp.json()["judges"]]
 
-    def get(self, judge_id: str) -> Judge:
-        resp = self._httpx.get(f"/judges/{judge_id}")
+    def get(self, judge_id: str, version=None) -> Judge:
+        params = dict(version=version) if version else None
+        resp = self._httpx.get(f"/judges/{judge_id}", params=params)
         resp.raise_for_status()
-        return Judge(**resp.json(), _backend=self._backend)
+        print(resp.json())
+        return self._init_judge(resp.json())
+
+    def _init_judge(self, json_data):
+        return Judge(name=json_data["name"],
+                     version=json_data["version"],
+                     description=json_data["description"],
+                     createTime=json_data["createTime"],
+                     judgeSpec=json_data.get("judgeSpec"),
+                     _backend=self._backend)
 
     # # U  (full or PATCH-style partial)
     # def update(self, judge_id: str, **fields) -> "Judge":
