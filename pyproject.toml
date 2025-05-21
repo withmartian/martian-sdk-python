@@ -1,5 +1,5 @@
 [project]
-name = "martian-sdk-python"
+name = "mmartian_apart_hack_sdk"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -8,19 +8,13 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "httpx>=0.28.1",
-    "martian_sdk_python",
+    "httpx>=0.28.1"
 ]
-
-[tool.uv.sources]
-foo = { path = "./src/martian_sdk_python" }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv.workspace]
-members = [
-    "demo",
-]
+[tool.hatch.build.targets.wheel]
+packages = ["src/martian_apart_hack_sdk"]
 

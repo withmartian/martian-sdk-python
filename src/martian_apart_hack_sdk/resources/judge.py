@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:                     # avoids circular import at runtime
-    from martian_sdk_python.backend import Backend
+    from martian_apart_hack_sdk.backend import Backend
 
 @dataclass
 class Judge:

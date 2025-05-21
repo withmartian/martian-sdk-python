@@ -1,4 +1,4 @@
-from martian_sdk_python.resources.judge import Judge
+from martian_apart_hack_sdk.resources.judge import Judge
 
 
 class JudgesClient:

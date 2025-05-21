@@ -2,12 +2,6 @@ version = 1
 revision = 2
 requires-python = ">=3.11"
 
-[manifest]
-members = [
-    "demo",
-    "martian-sdk-python",
-]
-
 [[package]]
 name = "anyio"
 version = "4.9.0"
@@ -30,11 +24,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/e8/9e/c05b3920a3b7d20d3
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4a/7e/3db2bd1b1f9e95f7cddca6d6e75e2f2bd9f51b1246e546d88addca0106bd/certifi-2025.4.26-py3-none-any.whl", hash = "sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3", size = 159618, upload-time = "2025-04-26T02:12:27.662Z" },
 ]
-
-[[package]]
-name = "demo"
-version = "0.1.0"
-source = { virtual = "demo" }
 
 [[package]]
 name = "h11"
@@ -83,7 +72,7 @@ wheels = [
 ]
 
 [[package]]
-name = "martian-sdk-python"
+name = "mmartian-apart-hack-sdk"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -91,10 +80,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "martian-sdk-python" },
-]
+requires-dist = [{ name = "httpx", specifier = ">=0.28.1" }]
 
 [[package]]
 name = "sniffio"

@@ -1,4 +1,4 @@
-from martian_sdk_python.backend import Backend
+from martian_apart_hack_sdk.backend import Backend
 
 
 # # Create ------------------------------------------------------
@@ -8,7 +8,8 @@ from martian_sdk_python.backend import Backend
 # )
 
 def main():
-    back = Backend("https://localhost:8000/", api_key="sk-test-123")
+    back = Backend("https://localhost:8000/", api_key="sk-test-123", org_id="123")
+    print(back)
     # judge = back.judges.get("j1").evaluate()
 
 

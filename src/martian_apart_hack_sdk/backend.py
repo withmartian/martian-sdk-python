@@ -1,6 +1,6 @@
 import httpx
 
-from martian_sdk_python.backend_clients.judges import JudgesClient
+from martian_apart_hack_sdk.backend_clients.judges import JudgesClient
 
 
 class Backend:
