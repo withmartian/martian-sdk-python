@@ -32,12 +32,12 @@ class Judge:
 
     # ---------- Evaluate -------------------------------------
 
-    def evaluate(self, prompt: str, output: str) -> Dict[str, Any]:
+    def evaluate(self, request, response) -> Dict[str, Any]:
         """
         Remote call:
         POST /judges/{id}/evaluate  →  {overall: float, by_rubric: {...}}
         """
-        return self._backend.judges.evaluate(self.id, prompt, output)
+        return self._backend.judges.evaluate(self.id, request, response)
 
     def passes(self, prompt: str, output: str, *, threshold: float = 0.8) -> bool:
         return self.evaluate(prompt, output)["overall"] >= threshold
@@ -45,7 +45,7 @@ class Judge:
     # ---------- CRUD shortcuts -------------------------------
 
     def update(self, **fields) -> "Judge":
-        """PATCH the Judge on the server, then mutate this proxy."""
+        """PATCH the Judge on the server, then return new version"""
         data = self._backend.judges.update(self.id, **fields).to_dict()
         self.__dict__.update(data)
         return self

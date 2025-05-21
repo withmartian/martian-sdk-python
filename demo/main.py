@@ -14,7 +14,7 @@ ORG_ID = os.getenv("MARTIAN_ORG_ID")
 def main():
     back = Backend(api_url=API_URL, api_key=API_KEY, org_id=ORG_ID)
     print("Getting Judge by ID and version 1")
-    judge_id = "quality-rubric-judge"
+    judge_id = "new-quality-rubric-judge"
     judge = back.judges.get(judge_id, version=1)
     print(judge)
     print("Refreshing Judge to get the latest version:")
@@ -26,7 +26,7 @@ def main():
     print("Found %d judges" % len(all_judges))
 
     print("Creating rubric judge")
-    new_judge_id = 'my_super_judge'
+    new_judge_id = 'my_cool_judge'
     rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     judge_model = "openai/openai/gpt-4o"
     new_judge = back.judges.create_rubric_judge(new_judge_id,
@@ -34,6 +34,7 @@ def main():
                                     model=judge_model,
                                     min_score=1,
                                     max_score=5,
+                                    description="This is a new judge description.",
                                     )
     # judge = back.judges.get("j1").evaluate()
     # # Create ------------------------------------------------------
