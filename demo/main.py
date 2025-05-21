@@ -24,6 +24,17 @@ def main():
     print("Listing judges:")
     all_judges = back.judges.list()
     print("Found %d judges" % len(all_judges))
+
+    print("Creating rubric judge")
+    new_judge_id = 'my_super_judge'
+    rubric = "You are helpful assistant to evaluate restaurant recommendation response."
+    judge_model = "openai/openai/gpt-4o"
+    new_judge = back.judges.create_rubric_judge(new_judge_id,
+                                    rubric=rubric,
+                                    model=judge_model,
+                                    min_score=1,
+                                    max_score=5,
+                                    )
     # judge = back.judges.get("j1").evaluate()
     # # Create ------------------------------------------------------
     # judge = back.judges.create(
