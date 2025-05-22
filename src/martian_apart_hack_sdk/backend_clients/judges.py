@@ -82,7 +82,6 @@ class JudgesClient:
             "response": completion.choices[0].message.to_dict(),
         } | completion.to_dict()
 
-    # TODO: Response type.
     def evaluate_judge(
             self,
             judge: judge_resource.Judge,
@@ -91,6 +90,7 @@ class JudgesClient:
     ) -> JudgeEvaluation:
         request_payload = self._get_evaluation_json_payload(completion_request)
         completion_payload = self._get_evaluation_json_payload(
+            # Cost and response fields are required by evaluate judge API 
             self._ensure_cost_response_in_completion(completion_response)
         )
         payload = {

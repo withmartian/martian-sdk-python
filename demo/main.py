@@ -14,7 +14,7 @@ from openai.types.chat import chat_completion, chat_completion_message, chat_com
 
 from martian_apart_hack_sdk import judge_specs, martian_client
 
-
+# TODO Remove this and use typed from utils.py
 class _ClientConfig(TypedDict):
     martian_api_url: str
     martian_api_key: str
@@ -58,7 +58,6 @@ def main():
         min_score=1,
         max_score=5,
     )
-
 
     # judges = client.judges.list()
     # print(f"Found {len(judges)} judges")
@@ -165,10 +164,11 @@ def main():
     print("Listing routers:")
     routers = client.routers.list()
     print("Found %d routers" % len(routers))
+    base_model = "openai/openai/gpt-4o"
+    new_router = client.routers.create_router("new-super-router-id", base_model, description="It's a new cool router")
+    print(new_router)
     print("Reading router by ID:")
-    router = client.routers.get(routers[0].id)
-    print(router)
-
+    print(client.routers.get("new-super-router"))
 
 if __name__ == "__main__":
     main()

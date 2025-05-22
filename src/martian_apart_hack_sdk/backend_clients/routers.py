@@ -20,7 +20,7 @@ class RoutersClient:
             version=json_data["version"],
             description=json_data["description"],
             createTime=json_data["createTime"],
-            routerSpec=json_data.get("routerSpec", {}).get("routerSpec"),
+            routerSpec=json_data.get("routerSpec"),
         )
 
     def _is_router_exists(self, router_id: str) -> bool:
@@ -29,16 +29,44 @@ class RoutersClient:
 
     @staticmethod
     def _get_router_spec_payload(router_spec: Dict[str, Any]) -> Dict[str, Any]:
-        return {"routerSpec": {"routerSpec": router_spec}}
+        return {"routerSpec": router_spec}
 
     def create_router(
             self,
             router_id: str,
-            router_spec: Dict[str, Any],
+            base_model: str,
             description: Optional[str] = None,
     ) -> router_resource.Router:
         if self._is_router_exists(router_id):
             raise ResourceNotFoundError(f"Router with id {router_id} already exists")
+        router_spec = {
+            'points': [
+                {
+                    'point': {
+                        'x': 0.0,
+                        'y': 0.0
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': base_model
+                        }
+                    }
+                },
+                {
+                    'point': {
+                        'x': 1.0,
+                        'y': 1.0
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': base_model
+                        }
+                    }
+                }
+            ]
+        }
         payload = self._get_router_spec_payload(router_spec)
         if description is not None:
             payload["description"] = description
