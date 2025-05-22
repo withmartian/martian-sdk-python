@@ -15,7 +15,6 @@ class RubricJudgeSpec:
     postscript: Optional[str] = None
     extract_variables: Optional[Dict[str, Any]] = None
     extract_judgement: Optional[Dict[str, Any]] = None
-    description: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         result = dataclasses.asdict(self)

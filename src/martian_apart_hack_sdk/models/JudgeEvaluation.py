@@ -1,1 +1,6 @@
-# TODO implement judge evaluation model (copy from monorepo)
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class JudgeEvaluation:
+    score: float
+    reason: str
