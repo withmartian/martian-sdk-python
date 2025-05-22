@@ -104,26 +104,26 @@ def main():
     }
     print("Evaluating judge")
     evaluation_result = client.judges.evaluate_judge(existing_judge,
-                                 completion_request=completion_request,
-                                 completion=chat_completion.ChatCompletion(
-                                     id="123",
-                                     choices=[
-                                         chat_completion.Choice(
-                                             finish_reason="stop",
-                                             index=0,
-                                             message=chat_completion_message.ChatCompletionMessage(
-                                                 role="assistant",
-                                                 content="Paris",
-                                             ),
-                                         )
-                                     ],
-                                     created=0,
-                                     model="gpt-4o",
-                                     object="chat.completion",
-                                     service_tier=None,
-                                 ),
-     )
-    print(json.dumps(evaluation_result))
+                                                     completion_request=completion_request,
+                                                     completion=chat_completion.ChatCompletion(
+                                                         id="123",
+                                                         choices=[
+                                                             chat_completion.Choice(
+                                                                 finish_reason="stop",
+                                                                 index=0,
+                                                                 message=chat_completion_message.ChatCompletionMessage(
+                                                                     role="assistant",
+                                                                     content="Paris",
+                                                                 ),
+                                                             )
+                                                         ],
+                                                         created=0,
+                                                         model="gpt-4o",
+                                                         object="chat.completion",
+                                                         service_tier=None,
+                                                     ),
+                                                     )
+    print(evaluation_result)
     # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     # judge_model = "openai/openai/gpt-4o"
     # new_judge = client.judges.create_rubric_judge(

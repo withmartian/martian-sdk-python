@@ -8,3 +8,4 @@ class ClientConfig:
     api_url: str
     org_id: str
     api_key: str
+    evaluation_timeout: int = 100
