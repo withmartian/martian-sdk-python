@@ -5,11 +5,10 @@ import json
 from typing import Any, Dict, Optional
 
 import httpx
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from openai.types.chat import chat_completion, chat_completion_message_param
 
-from martian_apart_hack_sdk import utils
-from martian_apart_hack_sdk.judge_specs import JudgeSpec
+from martian_apart_hack_sdk import judge_specs, utils
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from martian_apart_hack_sdk.models.JudgeEvaluation import JudgeEvaluation
 from martian_apart_hack_sdk.resources import judge as judge_resource
 
@@ -37,14 +36,14 @@ class JudgesClient:
         return {"judgeSpec": {"judgeSpec": judge_spec}}
 
     def create_judge(
-            self,
-            judge_id: str,
-            judge_spec: Dict[str, Any],
-            description: Optional[str] = None,
+        self,
+        judge_id: str,
+        judge_spec: judge_specs.JudgeSpec,
+        description: Optional[str] = None,
     ) -> judge_resource.Judge:
         if self._is_judge_exists(judge_id):
             raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
-        payload = self._get_judge_spec_payload(judge_spec)
+        payload = self._get_judge_spec_payload(judge_spec.to_dict())
         if description is not None:
             payload["description"] = description
         params = {"judgeId": judge_id}
@@ -52,9 +51,10 @@ class JudgesClient:
         resp.raise_for_status()
         return self._init_judge(json_data=resp.json())
 
-    def update_judge(self, judge_id: str, judge_spec: Dict[str, Any]) -> judge_resource.Judge:
-        payload = self._get_judge_spec_payload(judge_spec)
-        print(payload)
+    def update_judge(
+        self, judge_id: str, judge_spec: judge_specs.JudgeSpec
+    ) -> judge_resource.Judge:
+        payload = self._get_judge_spec_payload(judge_spec.to_dict())
         # can't update labels/description in API
         resp = self.httpx.patch(f"/judges/{judge_id}", json=payload)
         resp.raise_for_status()
@@ -68,7 +68,6 @@ class JudgesClient:
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
         resp.raise_for_status()
-        print(resp.json())
         return self._init_judge(resp.json())
 
     @staticmethod
@@ -84,10 +83,10 @@ class JudgesClient:
 
     # TODO: Response type.
     def evaluate_judge(
-            self,
-            judge: judge_resource.Judge,
-            completion_request: Dict[str, Any],
-            completion_response: chat_completion.ChatCompletion,
+        self,
+        judge: judge_resource.Judge,
+        completion_request: Dict[str, Any],
+        completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
         request_payload = self._get_evaluation_json_payload(completion_request)
         completion_payload = self._get_evaluation_json_payload(
@@ -98,7 +97,11 @@ class JudgesClient:
             "completionCreateParams": request_payload,
             "chatCompletion": completion_payload,
         }
-        resp = self.httpx.post(f"/judges/{judge.id}:evaluate", json=payload, timeout=self.config.evaluation_timeout)
+        resp = self.httpx.post(
+            f"/judges/{judge.id}:evaluate",
+            json=payload,
+            timeout=self.config.evaluation_timeout,
+        )
         resp.raise_for_status()
         return JudgeEvaluation(**resp.json()["judgement"])
 
@@ -116,15 +119,17 @@ class JudgesClient:
             "completionCreateParams": request_payload,
             "chatCompletion": completion_payload,
         }
-        resp = self.httpx.post("/judges:evaluate", json=payload, timeout=self.config.evaluation_timeout)
+        resp = self.httpx.post(
+            "/judges:evaluate", json=payload, timeout=self.config.evaluation_timeout
+        )
         resp.raise_for_status()
         return JudgeEvaluation(**resp.json()["judgement"])
 
-    # U  (full or PATCH-style partial)
-    def update(self, judge_id: str, **fields) -> "Judge":
-        resp = self._client.patch(f"/judges/{judge_id}", json=fields).json()
-        return Judge(**resp, _http=self._client)
+    # # U  (full or PATCH-style partial)
+    # def update(self, judge_id: str, **fields) -> "Judge":
+    #     resp = self._client.patch(f"/judges/{judge_id}", json=fields).json()
+    #     return Judge(**resp, _http=self._client)
 
-    # D
-    def delete(self, judge_id: str) -> None:
-        self._client.delete(f"/judges/{judge_id}")
+    # # D
+    # def delete(self, judge_id: str) -> None:
+    #     self._client.delete(f"/judges/{judge_id}")
