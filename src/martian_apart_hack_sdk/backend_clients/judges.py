@@ -25,7 +25,7 @@ class JudgesClient:
             version=json_data["version"],
             description=json_data["description"],
             createTime=json_data["createTime"],
-            judgeSpec=json_data.get("judgeSpec").get("judgeSpec"),
+            judgeSpec=json_data.get("judgeSpec", {}).get("judgeSpec"),
         )
 
     def _is_judge_exists(self, judge_id: str) -> bool:
@@ -42,8 +42,6 @@ class JudgesClient:
             judge_spec: Dict[str, Any],
             description: Optional[str] = None,
     ) -> judge_resource.Judge:
-        # TODO check that judge with judge_id is not exists before creating one (otherwise unclear 500 is returned
-        # Another idea is to implement upsert_judge() method and/or get_or_create_judge() method
         if self._is_judge_exists(judge_id):
             raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
         payload = self._get_judge_spec_payload(judge_spec)
@@ -79,10 +77,10 @@ class JudgesClient:
 
     @staticmethod
     def _ensure_cost_response_in_completion(completion: chat_completion.ChatCompletion):
-        return completion.to_dict() | {
+        return {
             "cost": 0.0,
             "response": completion.choices[0].message.to_dict(),
-        }
+        } | completion.to_dict()
 
     # TODO: Response type.
     def evaluate_judge(

@@ -57,35 +57,14 @@ def main():
         min_score=1,
         max_score=5,
     )
-    # client.judges.evaluate_judge_spec(
-    #     rubric_judge_spec,
-    #     completion_request={
-    #         "role": "user",
-    #         "content": "What is the capital of France?",
-    #     },
-    #     completion=chat_completion.ChatCompletion(
-    #         id="",
-    #         choices=[
-    #             chat_completion.Choice(
-    #                 finish_reason="stop",
-    #                 index=0,
-    #                 message=chat_completion_message.ChatCompletionMessage(
-    #                     role="assistant",
-    #                     content="Paris",
-    #                 ),
-    #             )
-    #         ],
-    #         created=0,
-    #         model="",
-    #         object="chat.completion",
-    #         service_tier=None,
-    #     ),
-    # )
 
+    judges = client.judges.list()
+    print(f"Found {len(judges)} judges")
+    exit()
     print("Creating rubric judge using spec")
     new_judge_id = "rubric-judge-test-id"
     existing_judge = client.judges.get(new_judge_id, version=1)
-
+    print(existing_judge.judgeSpec)
     # new_judge = client.judges.create_judge(new_judge_id, judge_spec=rubric_judge_spec.to_dict())
     # print(new_judge)
     # print("Changing the judge spec")
@@ -123,6 +102,8 @@ def main():
                                                           completion_response=chat_completion_response
                                                           )
     print(evaluation_result)
+
+
 
     # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     # judge_model = "openai/openai/gpt-4o"
