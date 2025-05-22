@@ -169,6 +169,38 @@ def main():
     print(new_router)
     print("Reading router by ID:")
     print(client.routers.get("new-super-router"))
+    print("Updating router:")
+    # TODO Create method to generate router spec
+    updated_router_spec = {
+            'points': [
+                {
+                    'point': {
+                        'x': 0.5,
+                        'y': 0.5
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': "openai/openai/gpt-4o"
+                        }
+                    }
+                },
+                {
+                    'point': {
+                        'x': 1.0,
+                        'y': 1.0
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': "openai/openai/gpt-4o"
+                        }
+                    }
+                }
+            ]
+        }
+    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec, description="It's a new cool router")
+    print(updated_router)
 
 if __name__ == "__main__":
     main()
