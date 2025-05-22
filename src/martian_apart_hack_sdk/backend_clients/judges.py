@@ -89,11 +89,11 @@ class JudgesClient:
             self,
             judge: judge_resource.Judge,
             completion_request: Dict[str, Any],
-            completion: chat_completion.ChatCompletion,
+            completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
         request_payload = self._get_evaluation_json_payload(completion_request)
         completion_payload = self._get_evaluation_json_payload(
-            self._ensure_cost_response_in_completion(completion)
+            self._ensure_cost_response_in_completion(completion_response)
         )
         payload = {
             "judgeVersion": judge.version,
@@ -104,25 +104,23 @@ class JudgesClient:
         resp.raise_for_status()
         return JudgeEvaluation(**resp.json()["judgement"])
 
-    # def evaluate_judge_spec(
-    #     self,
-    #     judge_spec,
-    #     completion_request: Dict[str, Any],
-    #     completion: chat_completion.ChatCompletion,
-    # ) -> JudgeEvaluation:
-    #     request_payload = self._get_evaluation_json_payload(completion_request)
-    #     completion_payload = self._get_evaluation_json_payload(
-    #         self._ensure_cost_response_in_completion(completion)
-    #     )
-    #     payload = {
-    #         "judgeSpec": judge_spec,
-    #         "completionCreateParams": request_payload,
-    #         "chatCompletion": completion_payload,
-    #     }
-    #     # what to put into judge id if it evaluates spec?
-    #     resp = self.httpx.post(f"/judges/{judge.id}:evaluate", json=payload, timeout=self.config.evaluation_timeout)
-    #     resp.raise_for_status()
-    #     return JudgeEvaluation(**resp.json()["judgement"])
+    def evaluate_judge_spec(
+        self,
+        judge_spec: Dict[str, Any],
+        completion_request: Dict[str, Any],
+        completion_response: chat_completion.ChatCompletion,
+    ) -> JudgeEvaluation:
+        request_payload = self._get_evaluation_json_payload(completion_request)
+        completion_payload = self._get_evaluation_json_payload(
+            self._ensure_cost_response_in_completion(completion_response)
+        )
+        payload = self._get_judge_spec_payload(judge_spec) | {
+            "completionCreateParams": request_payload,
+            "chatCompletion": completion_payload,
+        }
+        resp = self.httpx.post("/judges:evaluate", json=payload, timeout=self.config.evaluation_timeout)
+        resp.raise_for_status()
+        return JudgeEvaluation(**resp.json()["judgement"])
 
     # U  (full or PATCH-style partial)
     def update(self, judge_id: str, **fields) -> "Judge":
