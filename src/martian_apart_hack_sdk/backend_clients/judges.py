@@ -1,84 +1,93 @@
-from typing import Dict, Optional, Any
+"""Judge API client functions."""
 
-from martian_apart_hack_sdk.resources.judge import Judge
+import dataclasses
+from typing import Any, Dict, Optional
+
+import httpx
+from openai.types.chat import chat_completion, chat_completion_message_param
+
+from martian_apart_hack_sdk import utils
+from martian_apart_hack_sdk.resources import judge as judge_resource
 
 
+@dataclasses.dataclass(frozen=True)
 class JudgesClient:
-    def __init__(self, httpx, backend):
-        self._httpx = httpx
-        self._backend = backend
+    httpx: httpx.Client
+    config: utils.ClientConfig
 
     def _init_judge(self, json_data):
-        return Judge(name=json_data["name"],
-                     version=json_data["version"],
-                     description=json_data["description"],
-                     createTime=json_data["createTime"],
-                     judgeSpec=json_data.get("judgeSpec"),
-                     _backend=self._backend)
+        return judge_resource.Judge(
+            name=json_data["name"],
+            version=json_data["version"],
+            description=json_data["description"],
+            createTime=json_data["createTime"],
+            judgeSpec=json_data.get("judgeSpec"),
+        )
 
-    def create_judge(self, judge_id: str, judge_spec: Dict[str, Any], description: Optional[str] = None) -> Judge:
+    def create_judge(
+        self,
+        judge_id: str,
+        judge_spec: Dict[str, Any],
+        description: Optional[str] = None,
+    ) -> judge_resource.Judge:
         # TODO check that judge with judge_id is not exists before creating one (otherwise unclear 500 is returned
         # Another idea is to implement upsert_judge() method and/or get_or_create_judge() method
 
-        payload: Dict[str, Any] = {
-            "judgeSpec": {
-                "judgeSpec": judge_spec
-            }
-        }
+        payload: Dict[str, Any] = {"judgeSpec": {"judgeSpec": judge_spec}}
         if description is not None:
             payload["description"] = description
         print(payload)
         params = {"judgeId": judge_id}
-        resp = self._httpx.post("/judges", params=params, json=payload)
+        resp = self.httpx.post("/judges", params=params, json=payload)
         resp.raise_for_status()
         return self._init_judge(json_data=resp.json())
 
-    # TODO Create simple builder to create judge spec
-    def create_rubric_judge(self,
-                            judge_id: str,
-                            rubric: str,
-                            model: str,
-                            min_score: float,
-                            max_score: float,
-                            prescript: Optional[str] = None,
-                            postscript: Optional[str] = None,
-                            extract_variables: Optional[Dict[str, Any]] = None,
-                            extract_judgement: Optional[Dict[str, Any]] = None,
-                            description: Optional[str] = None
-                            ) -> Judge:
-        """
-        Create a 'rubric_judge' using explicit parameters.
-        """
-        judge_spec: Dict[str, Any] = {
-            "model_type": "rubric_judge",
-            "rubric": rubric,
-            "model": model,
-            "min_score": min_score,
-            "max_score": max_score,
-        }
-        for field, value in (
-                ("prescript", prescript),
-                ("postscript", postscript),
-                ("extract_variables", extract_variables),
-                ("extract_judgement", extract_judgement)
-        ):
-            if value is not None:
-                judge_spec[field] = value
-        return self.create_judge(judge_id, judge_spec, description)
-
-    def list(self) -> list[Judge]:
-        resp = self._httpx.get("/judges")
+    def list(self) -> list[judge_resource.Judge]:
+        resp = self.httpx.get("/judges")
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
-    def get(self, judge_id: str, version=None) -> Judge:
+    def get(self, judge_id: str, version=None) -> judge_resource.Judge:
         params = dict(version=version) if version else None
-        resp = self._httpx.get(f"/judges/{judge_id}", params=params)
+        resp = self.httpx.get(f"/judges/{judge_id}", params=params)
         resp.raise_for_status()
         print(resp.json())
         return self._init_judge(resp.json())
 
-    def evaluate(self, judge_id: str, request, response) -> Judge:
-        pass
+    # TODO: Response type.
+    def evaluate_judge(
+        self,
+        judge: judge_resource.Judge,
+        completion_request: chat_completion_message_param.ChatCompletionMessageParam,
+        completion: chat_completion.ChatCompletion,
+    ) -> None:
+        params = {
+            "judge": judge.id,
+            "judgeVersion": judge.version,
+            "completionCreateParams": completion_request,
+            "chatCompletion": completion,
+            # TODO: Work out why router is required.
+            "router": "",
+        }
+        resp = self.httpx.post("/judges:evaluate", params=params)
+        resp.raise_for_status()
+        print(resp.json())
+
+    # TODO: Response type.
+    def evaluate_judge_spec(
+        self,
+        judge_spec,
+        completion_request: chat_completion_message_param.ChatCompletionMessageParam,
+        completion: chat_completion.ChatCompletion,
+    ) -> None:
+        body = {
+            "judgeSpec": judge_spec.to_dict(),
+            "completionCreateParams": completion_request,
+            "chatCompletion": completion.model_dump_json(),
+        }
+        resp = self.httpx.post("/judges:evaluate", json=body)
+        resp.raise_for_status()
+        print(resp.json())
+
     # # U  (full or PATCH-style partial)
     # def update(self, judge_id: str, **fields) -> "Judge":
     #     resp = self._client.patch(f"/judges/{judge_id}", json=fields).json()
