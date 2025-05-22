@@ -1,13 +1,16 @@
 from __future__ import annotations
-from dataclasses import dataclass, field, InitVar
-from typing import List, Dict, Any, TYPE_CHECKING
 
-if TYPE_CHECKING:                     # avoids circular import at runtime
-    from martian_apart_hack_sdk.backend import Backend
+from dataclasses import InitVar, dataclass, field
+from typing import TYPE_CHECKING, Any, Dict, List
+
+if TYPE_CHECKING:  # avoids circular import at runtime
+    from martian_apart_hack_sdk.backend import MartianClient
+
 
 @dataclass(frozen=True, repr=True, eq=True, order=True)
 class Judge:
     """Local proxy for a *remote* Judge resource."""
+
     id: str = field(init=False)
     version: int
     description: str
@@ -15,7 +18,7 @@ class Judge:
     name: str
     judgeSpec: Dict[str, Any]
 
-    _backend: Backend = field(repr=False, compare=False)
+    _backend: MartianClient = field(repr=False, compare=False)
 
     def __post_init__(self):
         # Set id as the last segment after the last "/"
@@ -25,7 +28,6 @@ class Judge:
     def refresh(self) -> Judge:
         """Pull the latest server state and mutate in-place."""
         return self._backend.judges.get(self.id)
-
 
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}

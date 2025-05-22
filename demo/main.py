@@ -1,41 +1,80 @@
-import os
+"""A demo script for using the Martian SDK.
 
-from martian_apart_hack_sdk.backend import Backend
-from dotenv import load_dotenv
+Example usage:
 
-load_dotenv()
+    uv run -m demo.main
 
-API_URL = os.getenv("MARTIAN_API_URL")
-API_KEY = os.getenv("MARTIAN_API_KEY")
-ORG_ID = os.getenv("MARTIAN_ORG_ID")
+"""
 
+from typing import TypedDict
+
+import dotenv
+
+from martian_apart_hack_sdk import martian_client
+
+
+class _ClientConfig(TypedDict):
+    martian_api_url: str
+    martian_api_key: str
+    martian_org_id: str
+
+
+def _load_config() -> _ClientConfig:
+    config = dotenv.dotenv_values()
+
+    api_url = config.get("MARTIAN_API_URL")
+    api_key = config.get("MARTIAN_API_KEY")
+    org_id = config.get("MARTIAN_ORG_ID")
+
+    if api_url is None:
+        raise ValueError("MARTIAN_API_URL not set in .env")
+    if api_key is None:
+        raise ValueError("MARTIAN_API_KEY not set in .env")
+    if org_id is None:
+        raise ValueError("MARTIAN_ORG_ID not set in .env")
+
+    return _ClientConfig(
+        martian_api_url=api_url,
+        martian_api_key=api_key,
+        martian_org_id=org_id,
+    )
 
 
 def main():
-    back = Backend(api_url=API_URL, api_key=API_KEY, org_id=ORG_ID)
+    config = _load_config()
+
+    client = martian_client.MartianClient(
+        api_url=config["martian_api_url"],
+        api_key=config["martian_api_key"],
+        org_id=config["martian_org_id"],
+    )
+
+    print("Creating rubric judge")
+    new_judge_id = "my_cool_judge_id2"
+    rubric = "You are helpful assistant to evaluate restaurant recommendation response."
+    judge_model = "openai/openai/gpt-4o"
+    new_judge = client.judges.create_rubric_judge(
+        new_judge_id,
+        rubric=rubric,
+        model=judge_model,
+        min_score=1,
+        max_score=5,
+        description="This is a new judge description.",
+    )
+    print(f"Created judge: {new_judge}")
+
+    print("Listing judges:")
+    all_judges = client.judges.list()
+    print("Found %d judges" % len(all_judges))
+
     print("Getting Judge by ID and version 1")
     judge_id = "new-quality-rubric-judge"
-    judge = back.judges.get(judge_id, version=1)
+    judge = client.judges.get(judge_id, version=1)
     print(judge)
     print("Refreshing Judge to get the latest version:")
     refreshed_judge = judge.refresh()
     print(refreshed_judge.to_dict())
 
-    print("Listing judges:")
-    all_judges = back.judges.list()
-    print("Found %d judges" % len(all_judges))
-
-    print("Creating rubric judge")
-    new_judge_id = 'my_cool_judge_id'
-    rubric = "You are helpful assistant to evaluate restaurant recommendation response."
-    judge_model = "openai/openai/gpt-4o"
-    new_judge = back.judges.create_rubric_judge(new_judge_id,
-                                    rubric=rubric,
-                                    model=judge_model,
-                                    min_score=1,
-                                    max_score=5,
-                                    description="This is a new judge description.",
-                                    )
     # judge = back.judges.get("j1").evaluate()
     # # Create ------------------------------------------------------
     # judge = back.judges.create(
