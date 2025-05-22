@@ -9,8 +9,9 @@ Example usage:
 from typing import TypedDict
 
 import dotenv
+from openai.types.chat import chat_completion, chat_completion_message
 
-from martian_apart_hack_sdk import martian_client
+from martian_apart_hack_sdk import judge_specs, martian_client
 
 
 class _ClientConfig(TypedDict):
@@ -49,31 +50,89 @@ def main():
         org_id=config["martian_org_id"],
     )
 
-    print("Creating rubric judge")
-    new_judge_id = "my_cool_judge_id2"
-    rubric = "You are helpful assistant to evaluate restaurant recommendation response."
-    judge_model = "openai/openai/gpt-4o"
-    new_judge = client.judges.create_rubric_judge(
-        new_judge_id,
-        rubric=rubric,
-        model=judge_model,
+    rubric_judge_spec = judge_specs.RubricJudgeSpec(
+        model_type="rubric_judge",
+        rubric="You are helpful assistant to evaluate restaurant recommendation response.",
+        model="openai/openai/gpt-4o",
         min_score=1,
         max_score=5,
-        description="This is a new judge description.",
     )
-    print(f"Created judge: {new_judge}")
+    client.judges.evaluate_judge_spec(
+        rubric_judge_spec,
+        completion_request={
+            "role": "user",
+            "content": "What is the capital of France?",
+        },
+        completion=chat_completion.ChatCompletion(
+            id="",
+            choices=[
+                chat_completion.Choice(
+                    finish_reason="stop",
+                    index=0,
+                    message=chat_completion_message.ChatCompletionMessage(
+                        role="assistant",
+                        content="Paris",
+                    ),
+                )
+            ],
+            created=0,
+            model="",
+            object="chat.completion",
+            service_tier=None,
+        ),
+    )
 
-    print("Listing judges:")
-    all_judges = client.judges.list()
-    print("Found %d judges" % len(all_judges))
+    # print("Creating rubric judge")
+    # new_judge_id = "my_cool_judge_id2"
+    # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
+    # judge_model = "openai/openai/gpt-4o"
+    # new_judge = client.judges.create_rubric_judge(
+    #     new_judge_id,
+    #     rubric=rubric,
+    #     model=judge_model,
+    #     min_score=1,
+    #     max_score=5,
+    #     description="This is a new judge description.",
+    # )
+    # print(f"Created judge: {new_judge}")
 
-    print("Getting Judge by ID and version 1")
-    judge_id = "new-quality-rubric-judge"
-    judge = client.judges.get(judge_id, version=1)
-    print(judge)
-    print("Refreshing Judge to get the latest version:")
-    refreshed_judge = judge.refresh()
-    print(refreshed_judge.to_dict())
+    # print("Listing judges:")
+    # all_judges = client.judges.list()
+    # print("Found %d judges" % len(all_judges))
+
+    # print("Getting Judge by ID and version 1")
+    # judge_id = "my_cool_judge_id"
+    # judge = client.judges.get(judge_id, version=1)
+    # print(judge)
+    # print("Refreshing Judge to get the latest version:")
+    # refreshed_judge = judge.refresh()
+    # print(refreshed_judge.to_dict())
+
+    # client.judges.evaluate_judge()
+
+    # judge.evaluate(
+    #     completion_request={
+    #         "role": "user",
+    #         "content": "What is the capital of France?",
+    #     },
+    #     completion=chat_completion.ChatCompletion(
+    #         id="",
+    #         choices=[
+    #             chat_completion.Choice(
+    #                 finish_reason="stop",
+    #                 index=0,
+    #                 message=chat_completion_message.ChatCompletionMessage(
+    #                     role="assistant",
+    #                     content="Paris",
+    #                 ),
+    #             )
+    #         ],
+    #         created=0,
+    #         model="",
+    #         object="chat.completion",
+    #         service_tier=None,
+    #     ),
+    # )
 
     # judge = back.judges.get("j1").evaluate()
     # # Create ------------------------------------------------------
