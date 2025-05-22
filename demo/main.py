@@ -5,11 +5,11 @@ Example usage:
     uv run -m demo.main
 
 """
-
+import json
 from typing import TypedDict
 
 import dotenv
-from openai.types.chat import chat_completion, chat_completion_message
+from openai.types.chat import chat_completion, chat_completion_message, chat_completion_message_param
 
 from martian_apart_hack_sdk import judge_specs, martian_client
 
@@ -57,33 +57,73 @@ def main():
         min_score=1,
         max_score=5,
     )
-    client.judges.evaluate_judge_spec(
-        rubric_judge_spec,
-        completion_request={
-            "role": "user",
-            "content": "What is the capital of France?",
-        },
-        completion=chat_completion.ChatCompletion(
-            id="",
-            choices=[
-                chat_completion.Choice(
-                    finish_reason="stop",
-                    index=0,
-                    message=chat_completion_message.ChatCompletionMessage(
-                        role="assistant",
-                        content="Paris",
-                    ),
-                )
-            ],
-            created=0,
-            model="",
-            object="chat.completion",
-            service_tier=None,
-        ),
-    )
+    # client.judges.evaluate_judge_spec(
+    #     rubric_judge_spec,
+    #     completion_request={
+    #         "role": "user",
+    #         "content": "What is the capital of France?",
+    #     },
+    #     completion=chat_completion.ChatCompletion(
+    #         id="",
+    #         choices=[
+    #             chat_completion.Choice(
+    #                 finish_reason="stop",
+    #                 index=0,
+    #                 message=chat_completion_message.ChatCompletionMessage(
+    #                     role="assistant",
+    #                     content="Paris",
+    #                 ),
+    #             )
+    #         ],
+    #         created=0,
+    #         model="",
+    #         object="chat.completion",
+    #         service_tier=None,
+    #     ),
+    # )
 
-    # print("Creating rubric judge")
-    # new_judge_id = "my_cool_judge_id2"
+    print("Creating rubric judge using spec")
+    new_judge_id = "rubric-judge-test-id"
+    existing_judge = client.judges.get(new_judge_id, version=1)
+
+    # new_judge = client.judges.create_judge(new_judge_id, judge_spec=rubric_judge_spec.to_dict())
+    # print(new_judge)
+    # print("Changing the judge spec")
+    # existing_judge = client.judges.get(new_judge_id)
+    # existing_judge.judgeSpec["min_score"] = 2
+    # existing_judge.judgeSpec["model"] = "openai/openai/gpt-4o-mini"
+    # updated_judge = client.judges.update_judge(existing_judge.id, existing_judge.judgeSpec)
+    completion_request = {
+        "model": "openai/openai/gpt-4o-mini",
+        "messages": [
+            {
+                "role": "user",
+                "content": "What is the capital of France?"
+            }
+        ]
+    }
+    print("Evaluating judge")
+    evaluation_result = client.judges.evaluate_judge(existing_judge,
+                                 completion_request=completion_request,
+                                 completion=chat_completion.ChatCompletion(
+                                     id="123",
+                                     choices=[
+                                         chat_completion.Choice(
+                                             finish_reason="stop",
+                                             index=0,
+                                             message=chat_completion_message.ChatCompletionMessage(
+                                                 role="assistant",
+                                                 content="Paris",
+                                             ),
+                                         )
+                                     ],
+                                     created=0,
+                                     model="gpt-4o",
+                                     object="chat.completion",
+                                     service_tier=None,
+                                 ),
+     )
+    print(json.dumps(evaluation_result))
     # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     # judge_model = "openai/openai/gpt-4o"
     # new_judge = client.judges.create_rubric_judge(

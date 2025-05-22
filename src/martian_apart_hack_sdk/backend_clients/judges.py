@@ -1,13 +1,20 @@
 """Judge API client functions."""
 
 import dataclasses
+import json
 from typing import Any, Dict, Optional
 
 import httpx
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from openai.types.chat import chat_completion, chat_completion_message_param
 
 from martian_apart_hack_sdk import utils
+from martian_apart_hack_sdk.judge_specs import JudgeSpec
 from martian_apart_hack_sdk.resources import judge as judge_resource
+
+
+def _get_judge_spec_payload(judge_spec: Dict[str, Any]) -> Dict[str, Any]:
+    return {"judgeSpec": {"judgeSpec": judge_spec}}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -21,24 +28,36 @@ class JudgesClient:
             version=json_data["version"],
             description=json_data["description"],
             createTime=json_data["createTime"],
-            judgeSpec=json_data.get("judgeSpec"),
+            judgeSpec=json_data.get("judgeSpec").get("judgeSpec"),
         )
 
+    def _is_judge_exists(self, judge_id: str) -> bool:
+        resp = self.httpx.get(f"/judges/{judge_id}")
+        return resp.status_code == 200
+
     def create_judge(
-        self,
-        judge_id: str,
-        judge_spec: Dict[str, Any],
-        description: Optional[str] = None,
+            self,
+            judge_id: str,
+            judge_spec: Dict[str, Any],
+            description: Optional[str] = None,
     ) -> judge_resource.Judge:
         # TODO check that judge with judge_id is not exists before creating one (otherwise unclear 500 is returned
         # Another idea is to implement upsert_judge() method and/or get_or_create_judge() method
-
-        payload: Dict[str, Any] = {"judgeSpec": {"judgeSpec": judge_spec}}
+        if self._is_judge_exists(judge_id):
+            raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
+        payload = _get_judge_spec_payload(judge_spec)
         if description is not None:
             payload["description"] = description
-        print(payload)
         params = {"judgeId": judge_id}
         resp = self.httpx.post("/judges", params=params, json=payload)
+        resp.raise_for_status()
+        return self._init_judge(json_data=resp.json())
+
+    def update_judge(self, judge_id: str, judge_spec: Dict[str, Any]) -> judge_resource.Judge:
+        payload = _get_judge_spec_payload(judge_spec)
+        print(payload)
+        # can't update labels/description in API
+        resp = self.httpx.patch(f"/judges/{judge_id}", json=payload)
         resp.raise_for_status()
         return self._init_judge(json_data=resp.json())
 
@@ -53,40 +72,82 @@ class JudgesClient:
         print(resp.json())
         return self._init_judge(resp.json())
 
-    # TODO: Response type.
-    def evaluate_judge(
-        self,
-        judge: judge_resource.Judge,
-        completion_request: chat_completion_message_param.ChatCompletionMessageParam,
-        completion: chat_completion.ChatCompletion,
-    ) -> None:
-        params = {
-            "judge": judge.id,
-            "judgeVersion": judge.version,
-            "completionCreateParams": completion_request,
-            "chatCompletion": completion,
-            # TODO: Work out why router is required.
-            "router": "",
+    @staticmethod
+    def _get_evaluation_json_payload(data: Dict[str, Any]):
+        return {"jsonPayload": json.dumps(data)}
+
+    @staticmethod
+    def _ensure_cost_response_in_completion(completion: chat_completion.ChatCompletion):
+        return completion.to_dict() | {
+            "cost": 0.0,
+            "response": completion.choices[0].message.to_dict(),
         }
-        resp = self.httpx.post("/judges:evaluate", params=params)
-        resp.raise_for_status()
-        print(resp.json())
 
     # TODO: Response type.
-    def evaluate_judge_spec(
-        self,
-        judge_spec,
-        completion_request: chat_completion_message_param.ChatCompletionMessageParam,
-        completion: chat_completion.ChatCompletion,
+    def evaluate_judge(
+            self,
+            judge: judge_resource.Judge,
+            completion_request: Dict[str, Any],
+            completion: chat_completion.ChatCompletion,
     ) -> None:
-        body = {
-            "judgeSpec": judge_spec.to_dict(),
-            "completionCreateParams": completion_request,
-            "chatCompletion": completion.model_dump_json(),
+        null = None
+        false = False
+        true = True
+
+        request_payload = self._get_evaluation_json_payload(completion_request)
+        print(request_payload)
+        completion_payload = self._get_evaluation_json_payload(
+            self._ensure_cost_response_in_completion(completion)
+        )
+        print(completion_payload)
+        payload = {
+            "judgeVersion": judge.version,
+            "completionCreateParams": request_payload,
+            "chatCompletion": completion_payload,
+            # "completionCreateParams": self._get_evaluation_json_payload(
+            #     {"functions": null, "function_call": null, "tools": null, "tool_choice": null, "temperature": null,
+            #      "n": null,
+            #      "stream": false, "stream_options": null, "stop": null, "max_tokens": null, "presence_penalty": null,
+            #      "frequency_penalty": null, "logit_bias": null, "user": null, "top_p": null, "top_k": null,
+            #      "min_p": null,
+            #      "repetition_penalty": null, "messages": [
+            #         {
+            #             "content": "You are helpful assistant to find the restaurant according to the user preferences request",
+            #             "role": "system"}, {"content": "Where to drink filter coffee in Dorcol?", "role": "user"}]}),
+            # "chatCompletion": self._get_evaluation_json_payload(
+            #     {"id": "test-id", "choices": [{"finish_reason": "stop", "index": 0, "logprobs": null, "message": {
+            #         "content": "You could try a few places:\n    # 1. 7AM - It's nice coffee shop in Vracar, which serves filter, espresso and even cold brew\n    # 2. Sonder - New location from the well known coffee roster. They have two spots, one is located in Dorcol\n    # 3. Drip - Nice place to hang out, have great speciality lots, it's near Kalemegdan fortress",
+            #         "refusal": null, "role": "assistant", "annotations": null, "audio": null, "function_call": null,
+            #         "tool_calls": null}}], "created": 1234567890, "model": "test-model", "object": "chat.completion",
+            #      "service_tier": null, "system_fingerprint": null,
+            #      "usage": {"completion_tokens": 62, "prompt_tokens": 62, "total_tokens": 124,
+            #                "completion_tokens_details": {"accepted_prediction_tokens": null, "audio_tokens": null,
+            #                                              "reasoning_tokens": 0, "rejected_prediction_tokens": null},
+            #                "prompt_tokens_details": null}, "cost": 0.0, "response": {"role": "assistant",
+            #                                                                          "content": "You could try a few places:\n    # 1. 7AM - It's nice coffee shop in Vracar, which serves filter, espresso and even cold brew\n    # 2. Sonder - New location from the well known coffee roster. They have two spots, one is located in Dorcol\n    # 3. Drip - Nice place to hang out, have great speciality lots, it's near Kalemegdan fortress"},
+            #      "token_counts": {"prompt": 62.0, "completion": 62.0, "request": 0.0}})
+            # # TODO: Work out why router is required.
+            # "router": "",
         }
-        resp = self.httpx.post("/judges:evaluate", json=body)
+        resp = self.httpx.post(f"/judges/{judge.id}:evaluate", json=payload, timeout=100)
         resp.raise_for_status()
-        print(resp.json())
+        return resp.json()
+
+    # TODO: Response type.
+    # def evaluate_judge_spec(
+    #     self,
+    #     judge_spec,
+    #     completion_request: chat_completion_message_param.ChatCompletionMessageParam,
+    #     completion: chat_completion.ChatCompletion,
+    # ) -> None:
+    #     body = {
+    #         "judgeSpec": judge_spec.to_dict(),
+    #         "completionCreateParams": completion_request,
+    #         "chatCompletion": completion.model_dump_json(),
+    #     }
+    #     resp = self.httpx.post("/judges:evaluate", json=body)
+    #     resp.raise_for_status()
+    #     print(resp.json())
 
     # # U  (full or PATCH-style partial)
     # def update(self, judge_id: str, **fields) -> "Judge":
