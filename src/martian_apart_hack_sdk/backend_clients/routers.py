@@ -1,12 +1,15 @@
 """Router API client functions."""
 
 import dataclasses
+import json
 from typing import Any, Dict, Optional
 
 import httpx
 from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.resources import router as router_resource
+from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint
+from martian_apart_hack_sdk.resources.router import Router
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,30 +44,8 @@ class RoutersClient:
             raise ResourceNotFoundError(f"Router with id {router_id} already exists")
         router_spec = {
             'points': [
-                {
-                    'point': {
-                        'x': 0.0,
-                        'y': 0.0
-                    },
-                    'executor': {
-                        'spec': {
-                            'executor_type': 'ModelExecutor',
-                            'model_name': base_model
-                        }
-                    }
-                },
-                {
-                    'point': {
-                        'x': 1.0,
-                        'y': 1.0
-                    },
-                    'executor': {
-                        'spec': {
-                            'executor_type': 'ModelExecutor',
-                            'model_name': base_model
-                        }
-                    }
-                }
+                self._get_model_executor(base_model, x=0.0, y=0.0),
+                self._get_model_executor(base_model, x=1.0, y=1.0)
             ]
         }
         payload = self._get_router_spec_payload(router_spec)
@@ -74,6 +55,21 @@ class RoutersClient:
         resp = self.httpx.post("/routers", params=params, json=payload)
         resp.raise_for_status()
         return self._init_router(json_data=resp.json())
+
+    @staticmethod
+    def _get_model_executor(base_model, x, y):
+        return {
+            'point': {
+                'x': x,
+                'y': y
+            },
+            'executor': {
+                'spec': {
+                    'executor_type': 'ModelExecutor',
+                    'model_name': base_model
+                }
+            }
+        }
 
     def update_router(
             self,
@@ -109,9 +105,52 @@ class RoutersClient:
         resp = self.httpx.get("/routers")
         return [self._init_router(j) for j in resp.json()["routers"]]
 
-    def get(self, router_id: str, version=None) -> router_resource.Router:
+    def get(self, router_id: str, version=None) -> Optional[Router]:
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
-        print(resp.json())
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
         return self._init_router(resp.json())
+
+    def run(
+        self,
+        router_id: str,
+        routing_constraint: RoutingConstraint,
+        completion_request: Dict[str, Any],
+        version: Optional[int] = None,
+    ) -> str:
+        """Run a router with the given constraints and completion request.
+        
+        Args:
+            router_id: The ID of the router to run
+            routing_constraint: The routing constraints to apply
+            completion_request: The completion request parameters
+            version: Optional router version to use
+            
+        Returns:
+            The router's response string
+            
+        Raises:
+            ResourceNotFoundError: If the router doesn't exist
+        """
+        if not self._is_router_exists(router_id):
+            raise ResourceNotFoundError(f"Router with id {router_id} not found")
+
+        payload = {
+            "router": router_id,
+            "routingConstraint": routing_constraint.to_dict(),
+            "completionCreateParams": utils.get_evaluation_json_payload(completion_request)
+        }
+        if version is not None:
+            payload["routerVersion"] = version
+
+        resp = self.httpx.post(
+            f"/routers/{router_id}:run",
+            json=payload,
+            timeout=self.config.evaluation_timeout,
+        )
+        resp.raise_for_status()
+        return resp.json()["response"]
+
+    
