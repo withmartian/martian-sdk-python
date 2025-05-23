@@ -7,6 +7,7 @@ import httpx
 
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.backend_clients import judges as judges_client
+from martian_apart_hack_sdk.backend_clients import routers as routers_client
 
 
 @dataclasses.dataclass(frozen=True)
@@ -29,6 +30,10 @@ class MartianClient:
     @functools.cached_property
     def judges(self) -> judges_client.JudgesClient:
         return judges_client.JudgesClient(self._client, self._config)
+
+    @functools.cached_property
+    def routers(self) -> routers_client.RoutersClient:
+        return routers_client.RoutersClient(self._client, self._config)
 
     @functools.cached_property
     def _client(self) -> httpx.Client:

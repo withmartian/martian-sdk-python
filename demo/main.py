@@ -85,6 +85,39 @@ def main():
     )
     print(evaluation_result)
 
+    # Call OpenAI with the question "how to grow potatos on Mars" and judge the response with existing_judge
+    # Do the real request via OpenAI SDK
+
+    # Set OpenAI API key and endpoint (Martian API endpoint and key)
+    # openai_client = openai.OpenAI(
+    #     api_key=config["martian_api_key"],
+    #     # TODO Add field in config to be able to get openai/v1
+    #     base_url=config["martian_api_url"] + "/openai/v1"
+    # )
+    #
+    # # Prepare the OpenAI chat completion request
+    # openai_completion_request = {
+    #     "model": "openai/openai/gpt-4o-mini",
+    #     "messages": [
+    #         {
+    #             "role": "user",
+    #             "content": "How to grow potatos on Mars?"
+    #         }
+    #     ]
+    # }
+    # print("Testing OpenAI evaluation")
+    # # Call OpenAI to get the response
+    # openai_chat_completion_response = openai_client.chat.completions.create(**openai_completion_request)
+    #
+    # # Judge the OpenAI response using the existing judge
+    # print("Judging OpenAI response to 'how to grow potatos on Mars'")
+    # mars_evaluation_result = client.judges.evaluate_judge(
+    #     existing_judge,
+    #     completion_request=openai_completion_request,
+    #     completion_response=openai_chat_completion_response
+    # )
+    # print(mars_evaluation_result)
+
     # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
     # judge_model = "openai/openai/gpt-4o"
     # new_judge = client.judges.create_rubric_judge(
@@ -109,39 +142,47 @@ def main():
     # refreshed_judge = judge.refresh()
     # print(refreshed_judge.to_dict())
 
-    # client.judges.evaluate_judge()
-
-    # judge.evaluate(
-    #     completion_request={
-    #         "role": "user",
-    #         "content": "What is the capital of France?",
-    #     },
-    #     completion=chat_completion.ChatCompletion(
-    #         id="",
-    #         choices=[
-    #             chat_completion.Choice(
-    #                 finish_reason="stop",
-    #                 index=0,
-    #                 message=chat_completion_message.ChatCompletionMessage(
-    #                     role="assistant",
-    #                     content="Paris",
-    #                 ),
-    #             )
-    #         ],
-    #         created=0,
-    #         model="",
-    #         object="chat.completion",
-    #         service_tier=None,
-    #     ),
-    # )
-
-    # judge = back.judges.get("j1").evaluate()
-    # # Create ------------------------------------------------------
-    # judge = back.judges.create(
-    #     rubrics=[Rubric("accuracy", "facts correct").as_dict()],
-    #     llm="gpt-4o-mini",
-    # )
-
+    print("Let's test routers")
+    print("Listing routers:")
+    routers = client.routers.list()
+    print("Found %d routers" % len(routers))
+    base_model = "openai/openai/gpt-4o"
+    new_router = client.routers.create_router("new-super-router-id", base_model, description="It's a new cool router")
+    print(new_router)
+    print("Reading router by ID:")
+    print(client.routers.get("new-super-router"))
+    print("Updating router:")
+    # TODO Create method to generate router spec
+    updated_router_spec = {
+            'points': [
+                {
+                    'point': {
+                        'x': 0.5,
+                        'y': 0.5
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': "openai/openai/gpt-4o"
+                        }
+                    }
+                },
+                {
+                    'point': {
+                        'x': 1.0,
+                        'y': 1.0
+                    },
+                    'executor': {
+                        'spec': {
+                            'executor_type': 'ModelExecutor',
+                            'model_name': "openai/openai/gpt-4o"
+                        }
+                    }
+                }
+            ]
+        }
+    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec, description="It's a new cool router")
+    print(updated_router)
 
 if __name__ == "__main__":
     main()
