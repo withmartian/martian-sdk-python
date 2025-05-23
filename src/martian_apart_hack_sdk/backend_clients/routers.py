@@ -9,6 +9,7 @@ from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.resources import router as router_resource
 from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint
+from martian_apart_hack_sdk.resources.router import Router
 
 
 @dataclasses.dataclass(frozen=True)
@@ -104,10 +105,11 @@ class RoutersClient:
         resp = self.httpx.get("/routers")
         return [self._init_router(j) for j in resp.json()["routers"]]
 
-    def get(self, router_id: str, version=None) -> router_resource.Router:
+    def get(self, router_id: str, version=None) -> Optional[Router]:
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
-        print(resp.json())
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
         return self._init_router(resp.json())
 
