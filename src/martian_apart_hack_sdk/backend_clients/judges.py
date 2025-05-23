@@ -64,9 +64,11 @@ class JudgesClient:
         resp = self.httpx.get("/judges")
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
-    def get(self, judge_id: str, version=None) -> judge_resource.Judge:
+    def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
         return self._init_judge(resp.json())
 
