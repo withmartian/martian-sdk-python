@@ -17,6 +17,7 @@ from openai.types.chat import (
 )
 
 from martian_apart_hack_sdk import judge_specs, martian_client, utils
+from martian_apart_hack_sdk.judge_specs import JudgeSpec
 from martian_apart_hack_sdk.models.RouterConstraints import (
     RoutingConstraint,
     CostConstraint,
@@ -44,62 +45,56 @@ def main():
 
     judges = client.judges.list()
     print(f"Found {len(judges)} judges")
-    # print("Creating rubric judge using spec")
-    # new_judge_id = "rubric-judge-test-id"
-    # existing_judge = client.judges.get(new_judge_id, version=1)
-    # print(existing_judge.judgeSpec)
-    # new_judge = client.judges.create_judge(new_judge_id, judge_spec=rubric_judge_spec.to_dict())
-    # print(new_judge)
-    # print("Changing the judge spec")
-    # existing_judge = client.judges.get(new_judge_id)
-    # existing_judge.judgeSpec["min_score"] = 2
-    # existing_judge.judgeSpec["model"] = "openai/openai/gpt-4o-mini"
-    # updated_judge = client.judges.update_judge(existing_judge.id, existing_judge.judgeSpec)
-    # completion_request = {
-    #     "model": "openai/openai/gpt-4o-mini",
-    #     "messages": [{"role": "user", "content": "What is the capital of France?"}],
-    # }
-    # chat_completion_response = chat_completion.ChatCompletion(
-    #     id="123",
-    #     choices=[
-    #         chat_completion.Choice(
-    #             finish_reason="stop",
-    #             index=0,
-    #             message=chat_completion_message.ChatCompletionMessage(
-    #                 role="assistant",
-    #                 content="Paris",
-    #             ),
-    #         )
-    #     ],
-    #     created=0,
-    #     model="gpt-4o",
-    #     object="chat.completion",
-    #     service_tier=None,
-    # )
-    # print("Evaluating judge using id and version")
-    # evaluation_result = client.judges.evaluate_judge(
-    #     existing_judge,
-    #     completion_request=completion_request,
-    #     completion_response=chat_completion_response,
-    # )
-    # print(evaluation_result)
-    # print("Evaluating judge using spec")
-    # evaluation_result = client.judges.evaluate_judge_spec(
-    #     rubric_judge_spec.to_dict(),
-    #     completion_request=completion_request,
-    #     completion_response=chat_completion_response,
-    # )
-    # print(evaluation_result)
+    new_judge_id = "my-rubric-judge"
+    new_judge = client.judges.get(new_judge_id)
+    if not new_judge:
+        print("Creating rubric judge using spec")
+        new_judge = client.judges.create_judge(new_judge_id, judge_spec=rubric_judge_spec)
+    print(new_judge)
+    print("Changing the judge spec")
+    new_judge = client.judges.get(new_judge_id)
+    new_judge.judgeSpec["min_score"] = 2
+    new_judge.judgeSpec["model"] = "openai/openai/gpt-4o-mini"
+    print(new_judge.judgeSpec)
+    updated_judge = client.judges.update_judge(new_judge.id, judge_spec=JudgeSpec(**new_judge.judgeSpec))
+    completion_request = {
+        "model": "openai/openai/gpt-4o-mini",
+        "messages": [{"role": "user", "content": "What is the capital of France?"}],
+    }
+    chat_completion_response = chat_completion.ChatCompletion(
+        id="123",
+        choices=[
+            chat_completion.Choice(
+                finish_reason="stop",
+                index=0,
+                message=chat_completion_message.ChatCompletionMessage(
+                    role="assistant",
+                    content="Paris",
+                ),
+            )
+        ],
+        created=0,
+        model="gpt-4o",
+        object="chat.completion",
+        service_tier=None,
+    )
+    print("Evaluating judge using id and version")
+    evaluation_result = client.judges.evaluate_judge(
+        new_judge,
+        completion_request=completion_request,
+        completion_response=chat_completion_response,
+    )
+    print(evaluation_result)
+    print("Evaluating judge using spec")
+    evaluation_result = client.judges.evaluate_judge_spec(
+        rubric_judge_spec.to_dict(),
+        completion_request=completion_request,
+        completion_response=chat_completion_response,
+    )
+    print(evaluation_result)
 
     # Call OpenAI with the question "how to grow potatos on Mars" and judge the response with existing_judge
     # Do the real request via OpenAI SDK
-
-    # Set OpenAI API key and endpoint (Martian API endpoint and key)
-    openai_client = openai.OpenAI(
-        api_key=config.api_key,
-        # TODO Add field in config to be able to get openai/v1
-        base_url=config.api_url + "/openai/v1"
-    )
 
     openai_client_v2 = openai.OpenAI(
         api_key=config.api_key,

@@ -103,6 +103,7 @@ class JudgesClient:
             timeout=self.config.evaluation_timeout,
         )
         resp.raise_for_status()
+        print(resp.json())
         return JudgeEvaluation(**resp.json()["judgement"])
 
     def evaluate_judge_spec(
