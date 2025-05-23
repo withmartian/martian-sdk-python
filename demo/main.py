@@ -96,7 +96,7 @@ def main():
     # Call OpenAI with the question "how to grow potatos on Mars" and judge the response with existing_judge
     # Do the real request via OpenAI SDK
 
-    openai_client_v2 = openai.OpenAI(
+    openai_client = openai.OpenAI(
         api_key=config.api_key,
         # TODO Add field in config to be able to get openai/v2
         base_url=config.api_url + "/openai/v2"
@@ -111,7 +111,7 @@ def main():
                 "content": "How to grow potatos on Mars?"
             }
         ],
-        "max_tokens": 10
+        "max_tokens": 100
     }
     # print("Testing OpenAI evaluation")
     # # Call OpenAI to get the response
@@ -120,7 +120,7 @@ def main():
     # # Judge the OpenAI response using the existing judge
     # print("Judging OpenAI response to 'how to grow potatos on Mars'")
     # mars_evaluation_result = client.judges.evaluate_judge(
-    #     existing_judge,
+    #     updated_judge,
     #     completion_request=openai_completion_request,
     #     completion_response=openai_chat_completion_response
     # )
@@ -155,8 +155,11 @@ def main():
     routers = client.routers.list()
     print("Found %d routers" % len(routers))
     base_model = "openai/openai/gpt-4o"
-    # new_router = client.routers.create_router("new-super-router-id", base_model, description="It's a new cool router")
-    # print(new_router)
+    new_router_id = "new-super-router"
+    new_router = client.routers.get(new_router_id)
+    if not new_router:
+        new_router = client.routers.create_router(new_router_id, base_model, description="It's a new cool router")
+    print(new_router)
     print("Reading router by ID:")
     print(client.routers.get("new-super-router"))
     print("Updating router:")
@@ -222,27 +225,27 @@ def main():
     )
 
     # Testing router via OpenAI client:
-    # print("\nTesting router via OpenAI client with cost in extra_body:")
-    # print(cost_constraint.to_dict())
-    # response = openai_client_v2.chat.completions.create(
-    #     **openai_completion_request | {"model": updated_router.name},
-    #     extra_body={
-    #         "routing_constraint": cost_constraint.to_dict()
-    #     }
-    # )
-    # print(f"Response with cost=0.5: {response.llm_response}")
-    #
-    # print("\nTesting router via OpenAI client with quality in extra_body:")
-    # response = openai_client_v2.chat.completions.create(
-    #     **openai_completion_request | {"model": updated_router.name},
-    #     extra_body={
-    #         "routing_constraint": quality_constraint.to_dict()
-    #     }
-    # )
-    # print(f"Response with quality=0.7: {response}")
+    print("\nTesting router via OpenAI client with cost in extra_body:")
+    print(cost_constraint.to_dict())
+    response = openai_client.chat.completions.create(
+        **openai_completion_request | {"model": updated_router.name},
+        extra_body={
+            "routing_constraint": cost_constraint.to_dict()
+        }
+    )
+    print(f"Response with cost=0.5: {response.llm_response}")
+
+    print("\nTesting router via OpenAI client with quality in extra_body:")
+    response = openai_client.chat.completions.create(
+        **openai_completion_request | {"model": updated_router.name},
+        extra_body={
+            "routing_constraint": quality_constraint.to_dict()
+        }
+    )
+    print(f"Response with quality=0.7: {response}")
 
     print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
-    response = openai_client_v2.chat.completions.create(
+    response = openai_client.chat.completions.create(
         **openai_completion_request | {"model": updated_router.name},
         extra_body={
             "routing_constraint": cost_quality_constraint.to_dict()
