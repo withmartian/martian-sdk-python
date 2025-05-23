@@ -1,6 +1,8 @@
 """Utility functions and classes for the SDK."""
 
 import dataclasses
+import json
+from typing import Dict, Any
 
 import dotenv
 
@@ -32,3 +34,15 @@ def load_config() -> ClientConfig:
         api_key=api_key,
         org_id=org_id,
     )
+
+
+def get_evaluation_json_payload(data: Dict[str, Any]) -> Dict[str, str]:
+    """Convert data dictionary to JSON payload format expected by the API.
+    
+    Args:
+        data: Dictionary to convert to JSON payload
+        
+    Returns:
+        Dictionary with jsonPayload field containing JSON string
+    """
+    return {"jsonPayload": json.dumps(data)}

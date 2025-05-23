@@ -87,8 +87,8 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
-        request_payload = self._get_evaluation_json_payload(completion_request)
-        completion_payload = self._get_evaluation_json_payload(
+        request_payload = utils.get_evaluation_json_payload(completion_request)
+        completion_payload = utils.get_evaluation_json_payload(
             # Cost and response fields are required by evaluate judge API 
             self._ensure_cost_response_in_completion(completion_response)
         )
@@ -111,8 +111,8 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
-        request_payload = self._get_evaluation_json_payload(completion_request)
-        completion_payload = self._get_evaluation_json_payload(
+        request_payload = utils.get_evaluation_json_payload(completion_request)
+        completion_payload = utils.get_evaluation_json_payload(
             self._ensure_cost_response_in_completion(completion_response)
         )
         payload = self._get_judge_spec_payload(judge_spec) | {
