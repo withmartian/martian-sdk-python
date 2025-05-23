@@ -208,43 +208,17 @@ def main():
             value=ConstraintValue(numeric_value=0.5)
         )
     )
-    # print("\nTesting router with cost constraint:")
-    cost_response = client.routers.run(
-        router_id=updated_router.id,
-        routing_constraint=cost_constraint,
-        completion_request=completion_request
-    )
-    print(f"Cost constraint response: {cost_response}")
 
-    # # Test with quality constraint only
+    # Test with quality constraint only
     quality_constraint = RoutingConstraint(
         quality_constraint=QualityConstraint(
             value=ConstraintValue(numeric_value=0.7)
         )
     )
-    # print("\nTesting router with quality constraint:")
-    # quality_response = client.routers.run(
-    #     router_id=updated_router.id,
-    #     routing_constraint=quality_constraint,
-    #     completion_request=completion_request
-    # )
-    # print(f"Quality constraint response: {quality_response}")
 
     # Testing router via OpenAI client:
-    print("\nTesting router via OpenAI client without extra_body:")
-    try:
-        response = openai_client_v2.chat.completions.create(
-            **openai_completion_request | {"model": updated_router.name}
-        )
-        print(f"Response without extra_body: {response.choices[0].message.content}")
-    except openai.BadRequestError as e:
-        if e.status_code == 400 and "No routing constraint found in request extra" in str(e):
-            print("Expected error received: No routing constraint found in request extra")
-        else:
-            raise
-
     print("\nTesting router via OpenAI client with cost in extra_body:")
-    print(cost_constraint)
+    print(cost_constraint.to_dict())
     response = openai_client_v2.chat.completions.create(
         **openai_completion_request | {"model": updated_router.name},
         extra_body={
@@ -254,28 +228,38 @@ def main():
     print(f"Response with cost=0.5: {response.choices[0].message.content}")
 
     print("\nTesting router via OpenAI client with quality in extra_body:")
-    response = openai_client.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.id},
+    response = openai_client_v2.chat.completions.create(
+        **openai_completion_request | {"model": updated_router.name},
         extra_body={
-            "quality": 0.7
+            "routing_constraint": quality_constraint.to_dict()
         }
     )
     print(f"Response with quality=0.7: {response.choices[0].message.content}")
 
     print("\nTesting router via OpenAI client with cost model in extra_body:")
-    response = openai_client.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.id},
+    model_cost_constraint = RoutingConstraint(
+        cost_constraint=CostConstraint(
+            value=ConstraintValue(model_value="openai/openai/gpt-4o")
+        )
+    )
+    response = openai_client_v2.chat.completions.create(
+        **openai_completion_request | {"model": updated_router.name},
         extra_body={
-            "cost": "openai/openai/gpt-4o"
+            "routing_constraint": model_cost_constraint.to_dict()
         }
     )
     print(f"Response with cost=model: {response.choices[0].message.content}")
 
     print("\nTesting router via OpenAI client with quality model in extra_body:")
-    response = openai_client.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.id},
+    model_quality_constraint = RoutingConstraint(
+        quality_constraint=QualityConstraint(
+            value=ConstraintValue(model_value="openai/openai/gpt-4o")
+        )
+    )
+    response = openai_client_v2.chat.completions.create(
+        **openai_completion_request | {"model": updated_router.name},
         extra_body={
-            "quality": "openai/openai/gpt-4o"
+            "routing_constraint": model_quality_constraint.to_dict()
         }
     )
     print(f"Response with quality=model: {response.choices[0].message.content}")
