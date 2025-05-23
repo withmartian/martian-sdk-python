@@ -115,7 +115,8 @@ def main():
                 "role": "user",
                 "content": "How to grow potatos on Mars?"
             }
-        ]
+        ],
+        "max_tokens": 10
     }
     # print("Testing OpenAI evaluation")
     # # Call OpenAI to get the response
@@ -216,53 +217,72 @@ def main():
         )
     )
 
-    # Testing router via OpenAI client:
-    print("\nTesting router via OpenAI client with cost in extra_body:")
-    print(cost_constraint.to_dict())
-    response = openai_client_v2.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.name},
-        extra_body={
-            "routing_constraint": cost_constraint.to_dict()
-        }
-    )
-    print(f"Response with cost=0.5: {response.choices[0].message.content}")
-
-    print("\nTesting router via OpenAI client with quality in extra_body:")
-    response = openai_client_v2.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.name},
-        extra_body={
-            "routing_constraint": quality_constraint.to_dict()
-        }
-    )
-    print(f"Response with quality=0.7: {response.choices[0].message.content}")
-
-    print("\nTesting router via OpenAI client with cost model in extra_body:")
-    model_cost_constraint = RoutingConstraint(
-        cost_constraint=CostConstraint(
-            value=ConstraintValue(model_value="openai/openai/gpt-4o")
-        )
-    )
-    response = openai_client_v2.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.name},
-        extra_body={
-            "routing_constraint": model_cost_constraint.to_dict()
-        }
-    )
-    print(f"Response with cost=model: {response.choices[0].message.content}")
-
-    print("\nTesting router via OpenAI client with quality model in extra_body:")
-    model_quality_constraint = RoutingConstraint(
+    cost_quality_constraint = RoutingConstraint(
         quality_constraint=QualityConstraint(
-            value=ConstraintValue(model_value="openai/openai/gpt-4o")
+            value=ConstraintValue(numeric_value=0.7)
+        ),
+        cost_constraint=CostConstraint(
+            value=ConstraintValue(numeric_value=0.5)
         )
     )
+
+    # Testing router via OpenAI client:
+    # print("\nTesting router via OpenAI client with cost in extra_body:")
+    # print(cost_constraint.to_dict())
+    # response = openai_client_v2.chat.completions.create(
+    #     **openai_completion_request | {"model": updated_router.name},
+    #     extra_body={
+    #         "routing_constraint": cost_constraint.to_dict()
+    #     }
+    # )
+    # print(f"Response with cost=0.5: {response.llm_response}")
+    #
+    # print("\nTesting router via OpenAI client with quality in extra_body:")
+    # response = openai_client_v2.chat.completions.create(
+    #     **openai_completion_request | {"model": updated_router.name},
+    #     extra_body={
+    #         "routing_constraint": quality_constraint.to_dict()
+    #     }
+    # )
+    # print(f"Response with quality=0.7: {response}")
+
+    print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
     response = openai_client_v2.chat.completions.create(
         **openai_completion_request | {"model": updated_router.name},
         extra_body={
-            "routing_constraint": model_quality_constraint.to_dict()
+            "routing_constraint": cost_quality_constraint.to_dict()
         }
     )
-    print(f"Response with quality=model: {response.choices[0].message.content}")
+    print(f"Response with quality=0.7 and cost=0.5: {response.llm_response['choices'][0]['message']['content']}")
+
+    # print("\nTesting router via OpenAI client with cost model in extra_body:")
+    # model_cost_constraint = RoutingConstraint(
+    #     cost_constraint=CostConstraint(
+    #         value=ConstraintValue(model_name="openai/openai/gpt-4o")
+    #     )
+    # )
+    # print(model_cost_constraint.to_dict())
+    # response = openai_client_v2.chat.completions.create(
+    #     **openai_completion_request | {"model": updated_router.name},
+    #     extra_body={
+    #         "routing_constraint": model_cost_constraint.to_dict()
+    #     }
+    # )
+    # print(f"Response with cost=model: {response}")
+    #
+    # print("\nTesting router via OpenAI client with quality model in extra_body:")
+    # model_quality_constraint = RoutingConstraint(
+    #     quality_constraint=QualityConstraint(
+    #         value=ConstraintValue(model_name="openai/openai/gpt-4o")
+    #     )
+    # )
+    # response = openai_client_v2.chat.completions.create(
+    #     **openai_completion_request | {"model": updated_router.name},
+    #     extra_body={
+    #         "routing_constraint": model_quality_constraint.to_dict()
+    #     }
+    # )
+    # print(f"Response with quality=model: {response}")
 
 if __name__ == "__main__":
     main()

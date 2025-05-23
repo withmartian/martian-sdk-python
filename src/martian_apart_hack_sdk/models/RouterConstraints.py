@@ -8,15 +8,15 @@ from typing import Optional, Union, Literal
 class ConstraintValue:
     """Value for a constraint that can be either numeric or a model name."""
     numeric_value: Optional[float] = None
-    model_value: Optional[str] = None
+    model_name: Optional[str] = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary format expected by the API."""
         if self.numeric_value is not None:
             return {"numeric_value": self.numeric_value}
-        if self.model_value is not None:
-            return {"model_value": self.model_value}
-        raise ValueError("Either numeric_value or model_value must be set")
+        if self.model_name is not None:
+            return {"model_name": self.model_name}
+        raise ValueError("Either numeric_value or model_name must be set")
 
 
 @dataclasses.dataclass
