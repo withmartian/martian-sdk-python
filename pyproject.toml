@@ -21,3 +21,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/martian_apart_hack_sdk"]
 
+[dependency-groups]
+dev = [
+    "ipython>=8.18.1",
+    "jupyter>=1.1.1",
+]
