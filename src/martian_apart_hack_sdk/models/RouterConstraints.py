@@ -3,6 +3,7 @@
 import dataclasses
 from typing import Optional, Union, Literal
 
+ROUTING_CONSTRAINT_KEY = 'routing_constraint'
 
 @dataclasses.dataclass
 class ConstraintValue:

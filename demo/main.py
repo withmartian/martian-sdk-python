@@ -108,7 +108,7 @@ def main():
         "messages": [
             {
                 "role": "user",
-                "content": "How to grow potatos on Mars?"
+                "content": "How to grow potatoes on Mars?"
             }
         ],
         "max_tokens": 100
