@@ -2,7 +2,7 @@
 
 import dataclasses
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 from openai.types.chat import chat_completion, chat_completion_message_param
@@ -38,12 +38,14 @@ class JudgesClient:
     def create_judge(
         self,
         judge_id: str,
-        judge_spec: judge_specs.JudgeSpec,
+        judge_spec: Union[judge_specs.JudgeSpec,Dict[str, Any]],
         description: Optional[str] = None,
     ) -> judge_resource.Judge:
         if self._is_judge_exists(judge_id):
             raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
-        payload = self._get_judge_spec_payload(judge_spec.to_dict())
+        if not isinstance(judge_spec, dict):
+            judge_spec = judge_spec.to_dict()
+        payload = self._get_judge_spec_payload(judge_spec)
         if description is not None:
             payload["description"] = description
         params = {"judgeId": judge_id}
