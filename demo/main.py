@@ -212,7 +212,7 @@ def main():
     # Test with quality constraint only
     quality_constraint = RoutingConstraint(
         quality_constraint=QualityConstraint(
-            value=ConstraintValue(model_name="openai/openai/gpt-4o")
+            value=ConstraintValue(numeric_value=0.7)
         )
     )
     print("\nTesting router with quality constraint:")
@@ -229,7 +229,7 @@ def main():
             value=ConstraintValue(numeric_value=0.5)
         ),
         quality_constraint=QualityConstraint(
-            value=ConstraintValue(model_name="openai/openai/gpt-4o")
+            value=ConstraintValue(numeric_value=0.7)
         )
     )
     print("\nTesting router with both constraints:")
