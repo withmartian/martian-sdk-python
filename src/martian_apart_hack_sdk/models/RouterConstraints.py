@@ -1,14 +1,14 @@
 """Router constraints models."""
 
 import dataclasses
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 
 
 @dataclasses.dataclass
 class ConstraintValue:
     """Value for a constraint that can be either numeric or a model name."""
     numeric_value: Optional[float] = None
-    model_name: Optional[str] = None
+    model_name: Literal["string"] = "string"
 
     def to_dict(self) -> dict:
         """Convert to dictionary format expected by the API."""

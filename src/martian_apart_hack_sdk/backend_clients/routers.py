@@ -1,6 +1,7 @@
 """Router API client functions."""
 
 import dataclasses
+import json
 from typing import Any, Dict, Optional
 
 import httpx
@@ -142,6 +143,7 @@ class RoutersClient:
         if version is not None:
             payload["routerVersion"] = version
 
+        print(json.dumps(payload, indent=2))
         resp = self.httpx.post(
             f"/routers/{router_id}:run",
             json=payload,

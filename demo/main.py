@@ -16,6 +16,12 @@ from openai.types.chat import (
 )
 
 from martian_apart_hack_sdk import judge_specs, martian_client, utils
+from martian_apart_hack_sdk.models.RouterConstraints import (
+    RoutingConstraint,
+    CostConstraint,
+    QualityConstraint,
+    ConstraintValue,
+)
 
 
 def main():
@@ -37,11 +43,10 @@ def main():
 
     judges = client.judges.list()
     print(f"Found {len(judges)} judges")
-    exit()
-    print("Creating rubric judge using spec")
-    new_judge_id = "rubric-judge-test-id"
-    existing_judge = client.judges.get(new_judge_id, version=1)
-    print(existing_judge.judgeSpec)
+    # print("Creating rubric judge using spec")
+    # new_judge_id = "rubric-judge-test-id"
+    # existing_judge = client.judges.get(new_judge_id, version=1)
+    # print(existing_judge.judgeSpec)
     # new_judge = client.judges.create_judge(new_judge_id, judge_spec=rubric_judge_spec.to_dict())
     # print(new_judge)
     # print("Changing the judge spec")
@@ -49,41 +54,41 @@ def main():
     # existing_judge.judgeSpec["min_score"] = 2
     # existing_judge.judgeSpec["model"] = "openai/openai/gpt-4o-mini"
     # updated_judge = client.judges.update_judge(existing_judge.id, existing_judge.judgeSpec)
-    completion_request = {
-        "model": "openai/openai/gpt-4o-mini",
-        "messages": [{"role": "user", "content": "What is the capital of France?"}],
-    }
-    chat_completion_response = chat_completion.ChatCompletion(
-        id="123",
-        choices=[
-            chat_completion.Choice(
-                finish_reason="stop",
-                index=0,
-                message=chat_completion_message.ChatCompletionMessage(
-                    role="assistant",
-                    content="Paris",
-                ),
-            )
-        ],
-        created=0,
-        model="gpt-4o",
-        object="chat.completion",
-        service_tier=None,
-    )
-    print("Evaluating judge using id and version")
-    evaluation_result = client.judges.evaluate_judge(
-        existing_judge,
-        completion_request=completion_request,
-        completion_response=chat_completion_response,
-    )
-    print(evaluation_result)
-    print("Evaluating judge using spec")
-    evaluation_result = client.judges.evaluate_judge_spec(
-        rubric_judge_spec.to_dict(),
-        completion_request=completion_request,
-        completion_response=chat_completion_response,
-    )
-    print(evaluation_result)
+    # completion_request = {
+    #     "model": "openai/openai/gpt-4o-mini",
+    #     "messages": [{"role": "user", "content": "What is the capital of France?"}],
+    # }
+    # chat_completion_response = chat_completion.ChatCompletion(
+    #     id="123",
+    #     choices=[
+    #         chat_completion.Choice(
+    #             finish_reason="stop",
+    #             index=0,
+    #             message=chat_completion_message.ChatCompletionMessage(
+    #                 role="assistant",
+    #                 content="Paris",
+    #             ),
+    #         )
+    #     ],
+    #     created=0,
+    #     model="gpt-4o",
+    #     object="chat.completion",
+    #     service_tier=None,
+    # )
+    # print("Evaluating judge using id and version")
+    # evaluation_result = client.judges.evaluate_judge(
+    #     existing_judge,
+    #     completion_request=completion_request,
+    #     completion_response=chat_completion_response,
+    # )
+    # print(evaluation_result)
+    # print("Evaluating judge using spec")
+    # evaluation_result = client.judges.evaluate_judge_spec(
+    #     rubric_judge_spec.to_dict(),
+    #     completion_request=completion_request,
+    #     completion_response=chat_completion_response,
+    # )
+    # print(evaluation_result)
 
     # Call OpenAI with the question "how to grow potatos on Mars" and judge the response with existing_judge
     # Do the real request via OpenAI SDK
@@ -147,8 +152,8 @@ def main():
     routers = client.routers.list()
     print("Found %d routers" % len(routers))
     base_model = "openai/openai/gpt-4o"
-    new_router = client.routers.create_router("new-super-router-id", base_model, description="It's a new cool router")
-    print(new_router)
+    # new_router = client.routers.create_router("new-super-router-id", base_model, description="It's a new cool router")
+    # print(new_router)
     print("Reading router by ID:")
     print(client.routers.get("new-super-router"))
     print("Updating router:")
@@ -183,6 +188,57 @@ def main():
         }
     updated_router = client.routers.update_router("new-super-router-id", updated_router_spec, description="It's a new cool router")
     print(updated_router)
+
+    # Test router run with different constraints
+    completion_request = {
+        "model": "openai/openai/gpt-4o",
+        "messages": [{"role": "user", "content": "What is the capital of France?"}],
+    }
+
+    # Test with cost constraint only
+    cost_constraint = RoutingConstraint(
+        cost_constraint=CostConstraint(
+            value=ConstraintValue(numeric_value=0.5)
+        )
+    )
+    print("\nTesting router with cost constraint:")
+    cost_response = client.routers.run(
+        router_id=updated_router.id,
+        routing_constraint=cost_constraint,
+        completion_request=completion_request
+    )
+    print(f"Cost constraint response: {cost_response}")
+
+    # Test with quality constraint only
+    quality_constraint = RoutingConstraint(
+        quality_constraint=QualityConstraint(
+            value=ConstraintValue(model_name="openai/openai/gpt-4o")
+        )
+    )
+    print("\nTesting router with quality constraint:")
+    quality_response = client.routers.run(
+        router_id=updated_router.id,
+        routing_constraint=quality_constraint,
+        completion_request=completion_request
+    )
+    print(f"Quality constraint response: {quality_response}")
+
+    # Test with both constraints
+    both_constraints = RoutingConstraint(
+        cost_constraint=CostConstraint(
+            value=ConstraintValue(numeric_value=0.5)
+        ),
+        quality_constraint=QualityConstraint(
+            value=ConstraintValue(model_name="openai/openai/gpt-4o")
+        )
+    )
+    print("\nTesting router with both constraints:")
+    both_response = client.routers.run(
+        router_id=updated_router.id,
+        routing_constraint=both_constraints,
+        completion_request=completion_request
+    )
+    print(f"Both constraints response: {both_response}")
 
 if __name__ == "__main__":
     main()
