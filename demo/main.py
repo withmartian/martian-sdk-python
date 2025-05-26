@@ -9,6 +9,7 @@ Example usage:
 import json
 from typing import TypedDict
 
+from martian_apart_hack_sdk.resources.judge import Judge
 import openai
 from openai.types.chat import (
     chat_completion,
@@ -26,15 +27,14 @@ from martian_apart_hack_sdk.models.RouterConstraints import (
 )
 
 
-def main():
-    config = utils.load_config()
-
-    client = martian_client.MartianClient(
-        api_url=config.api_url,
-        api_key=config.api_key,
-        org_id=config.org_id,
-    )
-
+def managing_judges_demo(client) -> Judge:
+    """Demonstrates judge management operations including creation, updating, and evaluation.
+    
+    Args:
+        client: MartianClient instance
+    Returns:
+        Judge: The updated judge instance
+    """
     rubric_judge_spec = judge_specs.RubricJudgeSpec(
         model_type="rubric_judge",
         rubric="You are helpful assistant to evaluate restaurant recommendation response.",
@@ -80,7 +80,7 @@ def main():
     )
     print("Evaluating judge using id and version")
     evaluation_result = client.judges.evaluate_judge(
-        new_judge,
+        updated_judge,
         completion_request=completion_request,
         completion_response=chat_completion_response,
     )
@@ -92,15 +92,45 @@ def main():
         completion_response=chat_completion_response,
     )
     print(evaluation_result)
+    return updated_judge
 
-    # Call OpenAI with the question "how to grow potatos on Mars" and judge the response with existing_judge
-    # Do the real request via OpenAI SDK
+def openai_evaluation_demo(client, openai_client, judge, openai_completion_request):
+    """Demonstrates OpenAI evaluation using a judge.
+    
+    Args:
+        client: MartianClient instance
+        openai_client: OpenAI client instance
+        judge: Judge instance to use for evaluation
+         openai_completion_request: OpenAI Request to evaluate
+    """
+    print("Testing OpenAI evaluation")
+    # Call OpenAI to get the response
+    openai_chat_completion_response = openai_client.chat.completions.create(**openai_completion_request)
+    
+    # Judge the OpenAI response using the existing judge
+    print("Judging OpenAI response to 'how to grow potatos on Mars'")
+    mars_evaluation_result = client.judges.evaluate_judge(
+        judge,
+        completion_request=openai_completion_request,
+        completion_response=openai_chat_completion_response
+    )
+    print(mars_evaluation_result)
+
+def main():
+    config = utils.load_config()
+
+    client = martian_client.MartianClient(
+        api_url=config.api_url,
+        api_key=config.api_key,
+        org_id=config.org_id,
+    )
 
     openai_client = openai.OpenAI(
         api_key=config.api_key,
-        # TODO Add field in config to be able to get openai/v2
-        base_url=config.api_url + "/openai/v2"
+        base_url=config.openai_api_url
     )
+
+    judge = managing_judges_demo(client)
 
     # Prepare the OpenAI chat completion request
     openai_completion_request = {
@@ -113,42 +143,8 @@ def main():
         ],
         "max_tokens": 100
     }
-    # print("Testing OpenAI evaluation")
-    # # Call OpenAI to get the response
-    # openai_chat_completion_response = openai_client.chat.completions.create(**openai_completion_request)
-    #
-    # # Judge the OpenAI response using the existing judge
-    # print("Judging OpenAI response to 'how to grow potatos on Mars'")
-    # mars_evaluation_result = client.judges.evaluate_judge(
-    #     updated_judge,
-    #     completion_request=openai_completion_request,
-    #     completion_response=openai_chat_completion_response
-    # )
-    # print(mars_evaluation_result)
 
-    # rubric = "You are helpful assistant to evaluate restaurant recommendation response."
-    # judge_model = "openai/openai/gpt-4o"
-    # new_judge = client.judges.create_rubric_judge(
-    #     new_judge_id,
-    #     rubric=rubric,
-    #     model=judge_model,
-    #     min_score=1,
-    #     max_score=5,
-    #     description="This is a new judge description.",
-    # )
-    # print(f"Created judge: {new_judge}")
-
-    # print("Listing judges:")
-    # all_judges = client.judges.list()
-    # print("Found %d judges" % len(all_judges))
-
-    # print("Getting Judge by ID and version 1")
-    # judge_id = "my_cool_judge_id"
-    # judge = client.judges.get(judge_id, version=1)
-    # print(judge)
-    # print("Refreshing Judge to get the latest version:")
-    # refreshed_judge = judge.refresh()
-    # print(refreshed_judge.to_dict())
+    openai_evaluation_demo(client, openai_client, judge)
 
     print("Let's test routers")
     print("Listing routers:")
