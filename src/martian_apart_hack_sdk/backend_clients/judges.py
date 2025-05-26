@@ -64,6 +64,7 @@ class JudgesClient:
 
     def list(self) -> list[judge_resource.Judge]:
         resp = self.httpx.get("/judges")
+        resp.raise_for_status()
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
     def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:

@@ -103,6 +103,7 @@ class RoutersClient:
 
     def list(self) -> list[router_resource.Router]:
         resp = self.httpx.get("/routers")
+        resp.raise_for_status()
         return [self._init_router(j) for j in resp.json()["routers"]]
 
     def get(self, router_id: str, version=None) -> Optional[Router]:
