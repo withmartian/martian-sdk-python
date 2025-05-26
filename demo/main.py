@@ -5,11 +5,6 @@ Example usage:
     uv run -m demo.main
 
 """
-
-import json
-import os
-from typing import TypedDict
-
 import dotenv
 
 from martian_apart_hack_sdk.resources.judge import Judge
@@ -177,14 +172,12 @@ def main():
         org_id=config.org_id,
     )
 
-    dotenv.load_dotenv()
-
     openai_client = openai.OpenAI(
         api_key=config.api_key,
         base_url=config.openai_api_url,
     )
 
-    # judge = managing_judges_demo(client)
+    judge = managing_judges_demo(client)
 
     # Prepare the OpenAI chat completion request
     openai_completion_request = {
@@ -198,10 +191,11 @@ def main():
         "max_tokens": 100
     }
 
-    # openai_evaluation_demo(client, openai_client, judge)
+    openai_evaluation_demo(client, openai_client, judge, openai_completion_request)
 
-    # updated_router = managing_routers_demo(client)
-    updated_router = client.routers.get("new-super-router")
+    updated_router = managing_routers_demo(client)
+    # uncomment if you want to just use router
+    # updated_router = client.routers.get("new-super-router")
 
     # Test with cost constraint only
     cost_constraint = RoutingConstraint(
@@ -231,11 +225,15 @@ def main():
     print("\nTesting router via OpenAI client with quality in extra_body:")
     response = openai_client.chat.completions.create(
         **openai_completion_request | {"model": updated_router.name},
-        # extra_body={
-        #     "routing_constraint": quality_constraint.to_dict()
-        # }
+        extra_body={
+            "routing_constraint": quality_constraint.to_dict()
+        }
     )
     print(f"Response with quality=0.7: {response}")
+
+    print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
+    judge_score = client.judges.evaluate_judge(judge, completion_request=openai_completion_request, completion_response=response)
+    print(f"Judge score: {judge_score}")
 
     # print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
     # response = openai_client.chat.completions.create(

@@ -1,9 +1,7 @@
 """Router constraints models."""
 
 import dataclasses
-from typing import Optional, Union, Literal
-
-ROUTING_CONSTRAINT_KEY = 'routing_constraint'
+from typing import Optional
 
 @dataclasses.dataclass
 class ConstraintValue:
@@ -55,4 +53,18 @@ class RoutingConstraint:
             result["quality_constraint"] = self.quality_constraint.to_dict()
         if not result:
             raise ValueError("At least one constraint must be set")
-        return result 
+        return result
+
+
+def render_extra_body_router_constraint(routing_constraint: RoutingConstraint) -> dict:
+    """Render extra body for router constraint.
+    
+    Args:
+        routing_constraint: RoutingConstraint instance to render
+        
+    Returns:
+        dict: Dictionary with routing_constraint field containing the constraint dict
+    """
+    return {
+        "routing_constraint": routing_constraint.to_dict()
+    }
