@@ -7,7 +7,10 @@ Example usage:
 """
 
 import json
+import os
 from typing import TypedDict
+
+import dotenv
 
 from martian_apart_hack_sdk.resources.judge import Judge
 import openai
@@ -116,36 +119,7 @@ def openai_evaluation_demo(client, openai_client, judge, openai_completion_reque
     )
     print(mars_evaluation_result)
 
-def main():
-    config = utils.load_config()
-
-    client = martian_client.MartianClient(
-        api_url=config.api_url,
-        api_key=config.api_key,
-        org_id=config.org_id,
-    )
-
-    openai_client = openai.OpenAI(
-        api_key=config.api_key,
-        base_url=config.openai_api_url
-    )
-
-    judge = managing_judges_demo(client)
-
-    # Prepare the OpenAI chat completion request
-    openai_completion_request = {
-        "model": "openai/openai/gpt-4o-mini",
-        "messages": [
-            {
-                "role": "user",
-                "content": "How to grow potatoes on Mars?"
-            }
-        ],
-        "max_tokens": 100
-    }
-
-    openai_evaluation_demo(client, openai_client, judge)
-
+def managing_routers_demo(client):
     print("Let's test routers")
     print("Listing routers:")
     routers = client.routers.list()
@@ -161,41 +135,73 @@ def main():
     print("Updating router:")
     # TODO Create method to generate router spec
     updated_router_spec = {
-            'points': [
-                {
-                    'point': {
-                        'x': 0.5,
-                        'y': 0.5
-                    },
-                    'executor': {
-                        'spec': {
-                            'executor_type': 'ModelExecutor',
-                            'model_name': "openai/openai/gpt-4o"
-                        }
-                    }
+        'points': [
+            {
+                'point': {
+                    'x': 0.5,
+                    'y': 0.5
                 },
-                {
-                    'point': {
-                        'x': 1.0,
-                        'y': 1.0
-                    },
-                    'executor': {
-                        'spec': {
-                            'executor_type': 'ModelExecutor',
-                            'model_name': "openai/openai/gpt-4o"
-                        }
+                'executor': {
+                    'spec': {
+                        'executor_type': 'ModelExecutor',
+                        'model_name': "openai/openai/gpt-4o"
                     }
                 }
-            ]
-        }
-    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec, description="It's a new cool router")
-    print(updated_router)
-
-    # Test router run with different constraints
-    completion_request = {
-        "model": "openai/openai/gpt-4o",
-        "messages": [{"role": "user", "content": "What is the capital of France?"}],
+            },
+            {
+                'point': {
+                    'x': 1.0,
+                    'y': 1.0
+                },
+                'executor': {
+                    'spec': {
+                        'executor_type': 'ModelExecutor',
+                        'model_name': "openai/openai/gpt-4o"
+                    }
+                }
+            }
+        ]
     }
+    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec,
+                                                  description="It's a new cool router")
+    print(updated_router)
+    return updated_router
+
+
+def main():
+    config = utils.load_config()
+
+    client = martian_client.MartianClient(
+        api_url=config.api_url,
+        api_key=config.api_key,
+        org_id=config.org_id,
+    )
+
+    dotenv.load_dotenv()
+
+    openai_client = openai.OpenAI(
+        api_key=config.api_key,
+        base_url=config.openai_api_url,
+    )
+
+    # judge = managing_judges_demo(client)
+
+    # Prepare the OpenAI chat completion request
+    openai_completion_request = {
+        "model": "openai/openai/gpt-4o-mini",
+        "messages": [
+            {
+                "role": "user",
+                "content": "How to grow potatoes on Mars?"
+            }
+        ],
+        "max_tokens": 100
+    }
+
+    # openai_evaluation_demo(client, openai_client, judge)
+
+    # updated_router = managing_routers_demo(client)
+    updated_router = client.routers.get("new-super-router")
 
     # Test with cost constraint only
     cost_constraint = RoutingConstraint(
@@ -211,15 +217,6 @@ def main():
         )
     )
 
-    cost_quality_constraint = RoutingConstraint(
-        quality_constraint=QualityConstraint(
-            value=ConstraintValue(numeric_value=0.7)
-        ),
-        cost_constraint=CostConstraint(
-            value=ConstraintValue(numeric_value=0.5)
-        )
-    )
-
     # Testing router via OpenAI client:
     print("\nTesting router via OpenAI client with cost in extra_body:")
     print(cost_constraint.to_dict())
@@ -229,25 +226,25 @@ def main():
             "routing_constraint": cost_constraint.to_dict()
         }
     )
-    print(f"Response with cost=0.5: {response.llm_response}")
+    print(f"Response with cost=0.5: {response}")
 
     print("\nTesting router via OpenAI client with quality in extra_body:")
     response = openai_client.chat.completions.create(
         **openai_completion_request | {"model": updated_router.name},
-        extra_body={
-            "routing_constraint": quality_constraint.to_dict()
-        }
+        # extra_body={
+        #     "routing_constraint": quality_constraint.to_dict()
+        # }
     )
     print(f"Response with quality=0.7: {response}")
 
-    print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
-    response = openai_client.chat.completions.create(
-        **openai_completion_request | {"model": updated_router.name},
-        extra_body={
-            "routing_constraint": cost_quality_constraint.to_dict()
-        }
-    )
-    print(f"Response with quality=0.7 and cost=0.5: {response.llm_response['choices'][0]['message']['content']}")
+    # print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
+    # response = openai_client.chat.completions.create(
+    #     **openai_completion_request | {"model": updated_router.name},
+    #     extra_body={
+    #         "routing_constraint": cost_quality_constraint.to_dict()
+    #     }
+    # )
+    # print(f"Response with quality=0.7 and cost=0.5: {response.llm_response['choices'][0]['message']['content']}")
 
     # print("\nTesting router via OpenAI client with cost model in extra_body:")
     # model_cost_constraint = RoutingConstraint(
@@ -277,6 +274,7 @@ def main():
     #     }
     # )
     # print(f"Response with quality=model: {response}")
+
 
 if __name__ == "__main__":
     main()
