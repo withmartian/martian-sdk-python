@@ -12,6 +12,15 @@ from martian_apart_hack_sdk.backend_clients import routers as routers_client
 
 @dataclasses.dataclass(frozen=True)
 class MartianClient:
+    """The main client for the Martian SDK.
+    Use the MartianClient to interact with the Judges and Routers Clients.
+    
+    Args:
+        api_url: The base URL for the Martian API.
+        org_id: The ID of the organization to use.
+        api_key: The API key to use for authentication.
+    """
+
     api_url: str
     org_id: str
     api_key: str
@@ -25,14 +34,17 @@ class MartianClient:
 
     @functools.cached_property
     def base_url(self) -> str:
+        """Returns the base URL for the Martian API."""
         return f"{self.api_url}/v1/organizations/{self.org_id}/"
 
     @functools.cached_property
     def judges(self) -> judges_client.JudgesClient:
+        """Returns the Martian Judges client, which can be used to create, update, and list judges."""
         return judges_client.JudgesClient(self._client, self._config)
 
     @functools.cached_property
     def routers(self) -> routers_client.RoutersClient:
+        """Returns the Martian Routers client, which can be used to create, update, and list routers."""
         return routers_client.RoutersClient(self._client, self._config)
 
     @functools.cached_property

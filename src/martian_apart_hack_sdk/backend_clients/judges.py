@@ -15,6 +15,14 @@ from martian_apart_hack_sdk.resources import judge as judge_resource
 
 @dataclasses.dataclass(frozen=True)
 class JudgesClient:
+    """The client for the Martian Judges API. Use the JudgesClient to create, update, and list judges.
+
+    Normally, you don't need to create a JudgesClient directly. Instead, use the MartianClient.judges property to access the JudgesClient.
+
+    Args:
+        httpx: The HTTP client to use for the API.
+        config: The configuration for the API.
+    """
     httpx: httpx.Client
     config: utils.ClientConfig
 
@@ -41,6 +49,14 @@ class JudgesClient:
         judge_spec: Union[judge_specs.JudgeSpec,Dict[str, Any]],
         description: Optional[str] = None,
     ) -> judge_resource.Judge:
+        """Create a judge.
+        
+        Args:
+            judge_id: An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
+            judge_spec: The specification for the judge.
+            description: The description of the judge, for your own reference.
+        """
+
         if self._is_judge_exists(judge_id):
             raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
         if not isinstance(judge_spec, dict):
@@ -56,6 +72,18 @@ class JudgesClient:
     def update_judge(
         self, judge_id: str, judge_spec: judge_specs.JudgeSpec
     ) -> judge_resource.Judge:
+        """Update a judge.
+        
+        Args:
+            judge_id: The ID of the judge to update.
+            judge_spec: The new specification for the judge.
+
+        Returns:
+            The new version of the judge.
+
+            Note: Judge updates are non-destructive. The updated judge will have an incremented version number. You can use this version number to reference the judge in other API calls.
+            You can also access previous versions of the judge by passing the previous verison number to the `get` method.
+        """
         payload = self._get_judge_spec_payload(judge_spec.to_dict())
         # can't update labels/description in API
         resp = self.httpx.patch(f"/judges/{judge_id}", json=payload)
