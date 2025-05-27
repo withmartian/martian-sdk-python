@@ -5,7 +5,23 @@ from typing import Optional
 
 @dataclasses.dataclass
 class ConstraintValue:
-    """Value for a constraint that can be either numeric or a model name."""
+    """Value for a constraint that can be either numeric or a model name.
+    
+    Args:
+        numeric_value (Optional[float], optional): A numeric value for the constraint.
+        model_name (Optional[str], optional): The model name for the constraint.
+    
+    Raises:
+        ValueError: If both numeric_value and model_name are not set.
+
+    If the constraint value will be used as a cost constraint, the constraint value represents a maximum cost in USD.
+    If the constraint value will be used in a quality constraint, the constraint value represents a minimum quality score from 0 to 1.
+
+    Use a numeric_value to specify the constraint value explicitly.
+    Use a model_name to specify that the constraint mirrors the cost or quality of a specific model.
+
+    Note: You can not specify both numeric_value and model_name.
+    """
     numeric_value: Optional[float] = None
     model_name: Optional[str] = None
 
@@ -20,7 +36,11 @@ class ConstraintValue:
 
 @dataclasses.dataclass
 class CostConstraint:
-    """Cost constraint for routing."""
+    """Cost constraint for routing.
+    
+    Args:
+        value (ConstraintValue): The maximum cost in USD, specified as a either a direct numeric value or by referencing the cost of a specific model.
+    """
     value: ConstraintValue
 
     def to_dict(self) -> dict:
@@ -30,7 +50,11 @@ class CostConstraint:
 
 @dataclasses.dataclass
 class QualityConstraint:
-    """Quality constraint for routing."""
+    """Quality constraint for routing.
+    
+    Args:
+        value (ConstraintValue): The minimum quality score from 0 to 1, specified as a either a direct numeric value or by referencing the quality of a specific model.
+    """
     value: ConstraintValue
 
     def to_dict(self) -> dict:
@@ -40,7 +64,12 @@ class QualityConstraint:
 
 @dataclasses.dataclass
 class RoutingConstraint:
-    """Routing constraint that can be either a cost or quality constraint."""
+    """Routing constraint that can be either a cost or quality constraint, but not both.
+    
+    Args:
+        cost_constraint (Optional[CostConstraint], optional): The cost constraint.
+        quality_constraint (Optional[QualityConstraint], optional): The quality constraint.
+    """
     cost_constraint: Optional[CostConstraint] = None
     quality_constraint: Optional[QualityConstraint] = None
 
