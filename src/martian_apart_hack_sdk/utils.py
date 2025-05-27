@@ -22,6 +22,17 @@ class ClientConfig:
     api_key: str
     evaluation_timeout: int = 100
 
+    @property
+    def openai_api_url(self) -> str:
+        """Get the OpenAI API URL.
+        
+        Returns:
+            str: The OpenAI API URL constructed from the base API URL
+        """
+        return f"{self.api_url}/openai/v2"
+
+    
+
 
 def load_config() -> ClientConfig:
     config = dotenv.dotenv_values()
