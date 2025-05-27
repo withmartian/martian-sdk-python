@@ -177,6 +177,10 @@ def main():
         base_url=config.openai_api_url,
     )
 
+    print("Getting credit balance:")
+    credit_balance = client.organization.get_credit_balance()
+    print(credit_balance)
+
     judge = managing_judges_demo(client)
 
     # Prepare the OpenAI chat completion request
