@@ -20,8 +20,8 @@ class JudgesClient:
     Normally, you don't need to create a JudgesClient directly. Instead, use the MartianClient.judges property to access the JudgesClient.
 
     Args:
-        httpx: The HTTP client to use for the API.
-        config: The configuration for the API.
+        httpx (httpx.Client): The HTTP client to use for the API.
+        config (utils.ClientConfig): The configuration for the API.
     """
     httpx: httpx.Client
     config: utils.ClientConfig
@@ -52,9 +52,9 @@ class JudgesClient:
         """Create a judge.
         
         Args:
-            judge_id: An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
-            judge_spec: The specification for the judge.
-            description: The description of the judge, for your own reference.
+            judge_id (str): An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
+            judge_spec (Union[judge_specs.JudgeSpec, Dict[str, Any]]): The specification for the judge.
+            description (Optional[str], optional): The description of the judge, for your own reference.
         """
 
         if self._is_judge_exists(judge_id):
@@ -75,8 +75,8 @@ class JudgesClient:
         """Update a judge.
         
         Args:
-            judge_id: The ID of the judge to update.
-            judge_spec: The new specification for the judge.
+            judge_id (str): The ID of the judge to update.
+            judge_spec (judge_specs.JudgeSpec): The new specification for the judge.
 
         Returns:
             The new version of the judge.
@@ -91,11 +91,22 @@ class JudgesClient:
         return self._init_judge(json_data=resp.json())
 
     def list(self) -> list[judge_resource.Judge]:
+        """List all judges.
+        
+        Returns:
+            A list of all judges.
+        """
         resp = self.httpx.get("/judges")
         resp.raise_for_status()
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
     def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:
+        """Get a judge.
+        
+        Args:
+            judge_id (str): The ID of the judge to get.
+            version (Optional[int], optional): The version of the judge to get.
+        """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
         if resp.status_code == 404:

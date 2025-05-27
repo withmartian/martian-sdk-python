@@ -16,9 +16,9 @@ class MartianClient:
     Use the MartianClient to interact with the Judges and Routers Clients.
     
     Args:
-        api_url: The base URL for the Martian API.
-        org_id: The ID of the organization to use.
-        api_key: The API key to use for authentication.
+        api_url (str): The base URL for the Martian API.
+        org_id (str): The ID of the organization to use.
+        api_key (str): The API key to use for authentication.
     """
 
     api_url: str
