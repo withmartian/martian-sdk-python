@@ -8,7 +8,7 @@ import httpx
 from openai.types.chat import chat_completion, chat_completion_message_param
 
 from martian_apart_hack_sdk import judge_specs, utils
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
 from martian_apart_hack_sdk.models.JudgeEvaluation import JudgeEvaluation
 from martian_apart_hack_sdk.resources import judge as judge_resource
 
@@ -58,7 +58,7 @@ class JudgesClient:
         """
 
         if self._is_judge_exists(judge_id):
-            raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
+            raise ResourceAlreadyExistsError(f"Judge with id {judge_id} already exists")
         if not isinstance(judge_spec, dict):
             judge_spec = judge_spec.to_dict()
         payload = self._get_judge_spec_payload(judge_spec)
