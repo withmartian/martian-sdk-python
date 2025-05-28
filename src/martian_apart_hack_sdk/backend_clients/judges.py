@@ -120,6 +120,14 @@ class JudgesClient:
         return self._init_judge(resp.json())
 
     def get_versions(self, judge_id: str) -> List[judge_resource.Judge]:
+        """Get all versions of a judge.
+        
+        Args:
+            judge_id (str): The ID of the judge to get versions for.
+
+        Returns:
+            A list of all versions of the judge.
+        """
         resp = self.httpx.get(f"/judges/{judge_id}/versions")
         resp.raise_for_status()
         if not resp.json()["judges"]:
@@ -130,12 +138,22 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> str:
-        """
-        This method render judging prompt. It works only for rubric judge
-        :param judge:
-        :param completion_request:
-        :param completion_response:
-        :return: str: rendered prompt
+        """Render the judging prompt for a judge.
+
+        Concatenates the judge's prescript, rubric, and postscript;
+        evaluates variables in the prompt (e.g. `${min_score}`, `${max_score}`, `${content}`);
+        and returns the rendered prompt. 
+        
+        This is useful for debugging or for getting a sense of what the judge will see,
+        without having to run the judge or call the API.
+        
+        Args:
+            judge (judge_resource.Judge): The judge to render the prompt for.
+            completion_request (Dict[str, Any]): The completion request parameters.
+            completion_response (chat_completion.ChatCompletion): The completion response.
+
+        Returns:
+            str: The rendered prompt.
         """
         payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
         resp = self.httpx.post(

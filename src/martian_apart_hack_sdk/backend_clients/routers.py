@@ -212,19 +212,61 @@ class RoutersClient:
         llms: List[str],
         requests: List[Dict[str, Any]],
     ) -> RouterTrainingJob:
-        """Run a training job for a router with the specified parameters.
-        
+        """Train a router for a given set of models, using a judge and list of completion requests.
+
         Args:
-            router: The router to train
-            judge: The judge to use for evaluation
-            llms: List of LLM model names to use
-            requests: List of request objects containing messages for training
+            router (Router): The router to train.
+            judge (Judge): The judge to use for evaluation.
+            llms (List[str]): List of LLM model names to use.
+            requests (List[Dict[str, Any]]): List of request objects containing messages for training.
             
         Returns:
-            The training job response data
+            RouterTrainingJob: The training job response metadata.
+
+            Note: The response metadata contains information about the training job itself,
+            but does not contain any information about the results of training or router configuration.
             
         Raises:
-            httpx.HTTPError: If the request fails
+            httpx.HTTPError: If the request fails.
+
+        Examples:
+            Create a simple judge and router, then train the router using example requests:
+            
+            >>> # Create a basic judge that evaluates response quality
+            >>> judge_spec = RubricJudgeSpec(
+            ...     model_type="rubric_judge",
+            ...     model="gpt-4",
+            ...     rubric="Rate the response quality from 1-10 based on accuracy and completeness.",
+            ...     min_score=1,
+            ...     max_score=10
+            ... )
+            >>> judge = client.judges.create("quality_judge", judge_spec)
+            >>> 
+            >>> # Create a simple router
+            >>> router = client.routers.create("test_router", RouterSpec(...))
+            >>> 
+            >>> # Example training requests
+            >>> requests = [
+            ...     {
+            ...         "messages": [
+            ...             {"role": "user", "content": "What is Python?"}
+            ...         ]
+            ...     },
+            ...     {
+            ...         "messages": [
+            ...             {"role": "system", "content": "You are a machine learning expert who explains concepts clearly and concisely."},
+            ...             {"role": "user", "content": "Explain machine learning."}
+            ...         ]
+            ...     }
+            ... ]
+            >>> 
+            >>> # Train the router
+            >>> training_job = client.routers.run_training_job(
+            ...     router=router,
+            ...     judge=judge,
+            ...     llms=["gpt-3.5-turbo", "gpt-4"],
+            ...     requests=requests
+            ... )
         """
         payload = {
             "routerName": router.name,
@@ -251,16 +293,34 @@ class RoutersClient:
         """Poll a training job until it completes or fails.
         
         Args:
-            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
-            poll_interval: Number of seconds to wait between polls (default: 10)
-            poll_timeout: Maximum time to poll in seconds (default: 20 minutes)
+            job_name (str): The job name or ID. If it contains '/' it's treated as a full name
+                (e.g. 'organizations/org-name/router_training_jobs/job-id') and the last part is used as ID.
+            poll_interval (int, optional): Number of seconds to wait between polls. Defaults to 10.
+            poll_timeout (int, optional): Maximum time to poll in seconds. Defaults to 1200 (20 minutes).
             
         Returns:
-            The final RouterTrainingJob instance
+            RouterTrainingJob: The final training job state. Check the `status` field to determine
+                if the job completed successfully ("SUCCESS") or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
             
         Raises:
-            httpx.HTTPError: If the request fails
-            TimeoutError: If the job doesn't complete within the timeout period
+            httpx.HTTPError: If any API request fails.
+            TimeoutError: If the job doesn't complete within the poll_timeout period.
+
+        Examples:
+            >>> # Start a training job
+            >>> training_job = client.routers.run_training_job(...)
+            >>> 
+            >>> # Poll until completion
+            >>> final_job = client.routers.poll_training_job(
+            ...     job_name=training_job.name,
+            ...     poll_interval=15,    # Check every 15 seconds
+            ...     poll_timeout=600     # Wait up to 10 minutes
+            ... )
+            >>> 
+            >>> if final_job.status == "SUCCESS":
+            ...     print("Training completed successfully!")
+            ... else:
+            ...     print(f"Training failed with status: {final_job.status}")
         """
         # Extract job ID from full name if needed
         job_id = job_name.split('/')[-1] if '/' in job_name else job_name
