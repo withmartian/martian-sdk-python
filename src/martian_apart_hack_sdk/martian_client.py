@@ -9,6 +9,7 @@ import httpx
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.backend_clients import judges as judges_client
 from martian_apart_hack_sdk.backend_clients import routers as routers_client
+from martian_apart_hack_sdk.backend_clients import organization as organization_client
 
 
 @dataclasses.dataclass(frozen=True)
@@ -42,7 +43,7 @@ class MartianClient:
 
     @functools.cached_property
     def base_url(self) -> str:
-        return f"{self.api_url}/v1/organizations/{self.org_id}/"
+        return f"{self.api_url}/v1/organizations/{self.org_id}"
 
     @functools.cached_property
     def judges(self) -> judges_client.JudgesClient:
@@ -51,6 +52,11 @@ class MartianClient:
     @functools.cached_property
     def routers(self) -> routers_client.RoutersClient:
         return routers_client.RoutersClient(self._client, self._config)
+
+    @functools.cached_property
+    def organization(self) -> organization_client.OrganizationClient:
+        client = httpx.Client(base_url=f"{self.api_url}/organizations/{self.org_id}", headers=self._headers())
+        return organization_client.OrganizationClient(client, self._config)
 
     @functools.cached_property
     def _client(self) -> httpx.Client:
