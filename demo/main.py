@@ -27,7 +27,7 @@ from martian_apart_hack_sdk.models.RouterConstraints import (
 
 def managing_judges_demo(client) -> Judge:
     """Demonstrates judge management operations including creation, updating, and evaluation.
-    
+
     Args:
         client: MartianClient instance
     Returns:
@@ -94,7 +94,7 @@ def managing_judges_demo(client) -> Judge:
 
 def openai_evaluation_demo(client, openai_client, judge, openai_completion_request):
     """Demonstrates OpenAI evaluation using a judge.
-    
+
     Args:
         client: MartianClient instance
         openai_client: OpenAI client instance
@@ -104,7 +104,7 @@ def openai_evaluation_demo(client, openai_client, judge, openai_completion_reque
     print("Testing OpenAI evaluation")
     # Call OpenAI to get the response
     openai_chat_completion_response = openai_client.chat.completions.create(**openai_completion_request)
-    
+
     # Judge the OpenAI response using the existing judge
     print("Judging OpenAI response to 'how to grow potatos on Mars'")
     mars_evaluation_result = client.judges.evaluate_judge(
@@ -157,7 +157,7 @@ def managing_routers_demo(client):
             }
         ]
     }
-    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec,
+    updated_router = client.routers.update_router(new_router_id, updated_router_spec,
                                                   description="It's a new cool router")
     print(updated_router)
     return updated_router
@@ -176,6 +176,10 @@ def main():
         api_key=config.api_key,
         base_url=config.openai_api_url,
     )
+
+    print("Getting credit balance:")
+    credit_balance = client.organization.get_credit_balance()
+    print(credit_balance)
 
     judge = managing_judges_demo(client)
 
@@ -234,15 +238,6 @@ def main():
     print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
     judge_score = client.judges.evaluate_judge(judge, completion_request=openai_completion_request, completion_response=response)
     print(f"Judge score: {judge_score}")
-
-    # print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
-    # response = openai_client.chat.completions.create(
-    #     **openai_completion_request | {"model": updated_router.name},
-    #     extra_body={
-    #         "routing_constraint": cost_quality_constraint.to_dict()
-    #     }
-    # )
-    # print(f"Response with quality=0.7 and cost=0.5: {response.llm_response['choices'][0]['message']['content']}")
 
     # print("\nTesting router via OpenAI client with cost model in extra_body:")
     # model_cost_constraint = RoutingConstraint(
