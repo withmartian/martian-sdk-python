@@ -8,13 +8,21 @@ import httpx
 from openai.types.chat import chat_completion, chat_completion_message_param
 
 from martian_apart_hack_sdk import judge_specs, utils
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
 from martian_apart_hack_sdk.models.JudgeEvaluation import JudgeEvaluation
 from martian_apart_hack_sdk.resources import judge as judge_resource
 
 
 @dataclasses.dataclass(frozen=True)
 class JudgesClient:
+    """The client for the Martian Judges API. Use the JudgesClient to create, update, and list judges.
+
+    Normally, you don't need to create a JudgesClient directly. Instead, use the MartianClient.judges property to access the JudgesClient.
+
+    Args:
+        httpx (httpx.Client): The HTTP client to use for the API.
+        config (utils.ClientConfig): The configuration for the API.
+    """
     httpx: httpx.Client
     config: utils.ClientConfig
 
@@ -41,8 +49,16 @@ class JudgesClient:
         judge_spec: Union[judge_specs.JudgeSpec,Dict[str, Any]],
         description: Optional[str] = None,
     ) -> judge_resource.Judge:
+        """Create a judge.
+        
+        Args:
+            judge_id (str): An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
+            judge_spec (Union[judge_specs.JudgeSpec, Dict[str, Any]]): The specification for the judge.
+            description (Optional[str], optional): The description of the judge, for your own reference.
+        """
+
         if self._is_judge_exists(judge_id):
-            raise ResourceNotFoundError(f"Judge with id {judge_id} already exists")
+            raise ResourceAlreadyExistsError(f"Judge with id {judge_id} already exists")
         if not isinstance(judge_spec, dict):
             judge_spec = judge_spec.to_dict()
         payload = self._get_judge_spec_payload(judge_spec)
@@ -56,6 +72,18 @@ class JudgesClient:
     def update_judge(
         self, judge_id: str, judge_spec: judge_specs.JudgeSpec
     ) -> judge_resource.Judge:
+        """Update a judge.
+        
+        Args:
+            judge_id (str): The ID of the judge to update.
+            judge_spec (judge_specs.JudgeSpec): The new specification for the judge.
+
+        Returns:
+            The new version of the judge.
+
+            Note: Judge updates are non-destructive. The updated judge will have an incremented version number. You can use this version number to reference the judge in other API calls.
+            You can also access previous versions of the judge by passing the previous verison number to the `get` method.
+        """
         payload = self._get_judge_spec_payload(judge_spec.to_dict())
         # can't update labels/description in API
         resp = self.httpx.patch(f"/judges/{judge_id}", json=payload)
@@ -63,11 +91,27 @@ class JudgesClient:
         return self._init_judge(json_data=resp.json())
 
     def list(self) -> list[judge_resource.Judge]:
+        """List all judges.
+        
+        Returns:
+            A list of all judges.
+        """
         resp = self.httpx.get("/judges")
         resp.raise_for_status()
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
     def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:
+        """Get a judge.
+        
+        Args:
+            judge_id (str): The ID of the judge to get.
+            version (Optional[int], optional): The version of the judge to get. If not provided, the latest version will be returned.
+
+        Returns:
+            judge_resource.Judge: The judge resource. OR None if the judge does not exist.
+
+        
+        """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
         if resp.status_code == 404:

@@ -46,3 +46,7 @@ class RateLimitError(MartianApartHackError):
 class ResourceNotFoundError(MartianApartHackError):
     """Raised when a requested resource is not found."""
     pass
+
+class ResourceAlreadyExistsError(MartianApartHackError):
+    """Raised when attempting to create a resource that already exists."""
+    pass
