@@ -235,6 +235,10 @@ def main():
     )
     print(f"Response with quality=0.7: {response}")
 
+    print(f"Testing router via run method")
+    response = client.routers.run(updated_router, quality_constraint, openai_completion_request)
+    print(response)
+
     print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
     judge_score = client.judges.evaluate_judge(judge, completion_request=openai_completion_request, completion_response=response)
     print(f"Judge score: {judge_score}")
