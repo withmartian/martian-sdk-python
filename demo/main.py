@@ -81,6 +81,15 @@ def managing_judges_demo(client) -> Judge:
         object="chat.completion",
         service_tier=None,
     )
+
+    print("Rendering judge prompt using id")
+    rendered_prompt = client.judges.render_prompt(
+        new_judge,
+        completion_request=completion_request,
+        completion_response=chat_completion_response
+    )
+    print(rendered_prompt)
+
     print("Evaluating judge using id and version")
     evaluation_result = client.judges.evaluate(
         updated_judge,
@@ -96,6 +105,7 @@ def managing_judges_demo(client) -> Judge:
     )
     print(evaluation_result)
     return updated_judge
+
 
 def openai_evaluation_demo(client, openai_client, judge, openai_completion_request):
     """Demonstrates OpenAI evaluation using a judge.
@@ -118,6 +128,7 @@ def openai_evaluation_demo(client, openai_client, judge, openai_completion_reque
         completion_response=openai_chat_completion_response
     )
     print(mars_evaluation_result)
+
 
 def managing_routers_demo(client):
     print("Let's test routers")
@@ -241,7 +252,8 @@ def main():
     print(f"Response with quality=0.7: {response}")
 
     print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
-    judge_score = client.judges.evaluate(judge, completion_request=openai_completion_request, completion_response=response)
+    judge_score = client.judges.evaluate(judge, completion_request=openai_completion_request,
+                                         completion_response=response)
     print(f"Judge score: {judge_score}")
 
     # print("\nTesting router via OpenAI client with cost model in extra_body:")

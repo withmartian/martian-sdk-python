@@ -81,6 +81,40 @@ class JudgesClient:
             raise ResourceNotFoundError(f"Judge with id {judge_id} does not exist")
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
+    def render_prompt(self, judge: judge_resource.Judge,
+        completion_request: Dict[str, Any],
+        completion_response: chat_completion.ChatCompletion,
+    ) -> str:
+        """
+        This method render judging prompt. It works only for rubric judge
+        :param judge:
+        :param completion_request:
+        :param completion_response:
+        :return: str: rendered prompt
+        """
+        payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
+        resp = self.httpx.post(
+            f"/judges/{judge.id}:render",
+            json=payload,
+            timeout=self.config.evaluation_timeout,
+        )
+        resp.raise_for_status()
+        return json.loads(resp.json()["prompt"])["rubric_judge"]
+
+
+    def _prepare_judge_evaluation_payload(self, judge, completion_request, completion_response):
+        request_payload = utils.get_evaluation_json_payload(completion_request)
+        completion_payload = utils.get_evaluation_json_payload(
+            # Cost and response fields are required by evaluate judge API
+            self._ensure_cost_response_in_completion(completion_response)
+        )
+        payload = {
+            "judgeVersion": judge.version,
+            "completionCreateParams": request_payload,
+            "chatCompletion": completion_payload,
+        }
+        return payload
+
     @staticmethod
     def _get_evaluation_json_payload(data: Dict[str, Any]):
         return {"jsonPayload": json.dumps(data)}
@@ -98,16 +132,7 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
-        request_payload = utils.get_evaluation_json_payload(completion_request)
-        completion_payload = utils.get_evaluation_json_payload(
-            # Cost and response fields are required by evaluate judge API 
-            self._ensure_cost_response_in_completion(completion_response)
-        )
-        payload = {
-            "judgeVersion": judge.version,
-            "completionCreateParams": request_payload,
-            "chatCompletion": completion_payload,
-        }
+        payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
         resp = self.httpx.post(
             f"/judges/{judge.id}:evaluate",
             json=payload,
