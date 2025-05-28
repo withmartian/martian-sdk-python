@@ -2,7 +2,7 @@
 
 import dataclasses
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 
 import httpx
 from openai.types.chat import chat_completion, chat_completion_message_param
@@ -75,6 +75,12 @@ class JudgesClient:
         resp.raise_for_status()
         return self._init_judge(resp.json())
 
+    def get_versions(self, judge_id: str) -> List[judge_resource.Judge]:
+        resp = self.httpx.get(f"/judges/{judge_id}/versions")
+        if not resp.json()["judges"]:
+            raise ResourceNotFoundError(f"Judge with id {judge_id} does not exist")
+        return [self._init_judge(j) for j in resp.json()["judges"]]
+
     @staticmethod
     def _get_evaluation_json_payload(data: Dict[str, Any]):
         return {"jsonPayload": json.dumps(data)}
@@ -86,7 +92,7 @@ class JudgesClient:
             "response": completion.choices[0].message.to_dict(),
         } | completion.to_dict()
 
-    def evaluate_judge(
+    def evaluate(
         self,
         judge: judge_resource.Judge,
         completion_request: Dict[str, Any],
@@ -110,7 +116,7 @@ class JudgesClient:
         resp.raise_for_status()
         return JudgeEvaluation(**resp.json()["judgement"])
 
-    def evaluate_judge_spec(
+    def evaluate_using_judge_spec(
         self,
         judge_spec: Dict[str, Any],
         completion_request: Dict[str, Any],

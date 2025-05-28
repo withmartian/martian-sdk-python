@@ -59,6 +59,11 @@ def managing_judges_demo(client) -> Judge:
         "model": "openai/openai/gpt-4o-mini",
         "messages": [{"role": "user", "content": "What is the capital of France?"}],
     }
+
+    print("Getting judge versions")
+    judge_versions = client.judges.get_versions(new_judge.id)
+    print(f"Found {len(judge_versions)} judge versions")
+
     chat_completion_response = chat_completion.ChatCompletion(
         id="123",
         choices=[
@@ -77,14 +82,14 @@ def managing_judges_demo(client) -> Judge:
         service_tier=None,
     )
     print("Evaluating judge using id and version")
-    evaluation_result = client.judges.evaluate_judge(
+    evaluation_result = client.judges.evaluate(
         updated_judge,
         completion_request=completion_request,
         completion_response=chat_completion_response,
     )
     print(evaluation_result)
     print("Evaluating judge using spec")
-    evaluation_result = client.judges.evaluate_judge_spec(
+    evaluation_result = client.judges.evaluate_using_judge_spec(
         rubric_judge_spec.to_dict(),
         completion_request=completion_request,
         completion_response=chat_completion_response,
@@ -107,7 +112,7 @@ def openai_evaluation_demo(client, openai_client, judge, openai_completion_reque
 
     # Judge the OpenAI response using the existing judge
     print("Judging OpenAI response to 'how to grow potatos on Mars'")
-    mars_evaluation_result = client.judges.evaluate_judge(
+    mars_evaluation_result = client.judges.evaluate(
         judge,
         completion_request=openai_completion_request,
         completion_response=openai_chat_completion_response
@@ -236,7 +241,7 @@ def main():
     print(f"Response with quality=0.7: {response}")
 
     print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
-    judge_score = client.judges.evaluate_judge(judge, completion_request=openai_completion_request, completion_response=response)
+    judge_score = client.judges.evaluate(judge, completion_request=openai_completion_request, completion_response=response)
     print(f"Judge score: {judge_score}")
 
     # print("\nTesting router via OpenAI client with cost model in extra_body:")
