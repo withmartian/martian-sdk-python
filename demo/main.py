@@ -23,14 +23,16 @@ from martian_apart_hack_sdk.models.RouterConstraints import (
     CostConstraint,
     QualityConstraint,
     ConstraintValue,
-    render_extra_body_router_constraint
+    render_extra_body_router_constraint,
 )
+from martian_apart_hack_sdk.models import llm_models as Models
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 def managing_judges_demo(client) -> Judge:
     """Demonstrates judge management operations including creation, updating, and evaluation.
@@ -43,7 +45,7 @@ def managing_judges_demo(client) -> Judge:
     rubric_judge_spec = judge_specs.RubricJudgeSpec(
         model_type="rubric_judge",
         rubric="You are helpful assistant to evaluate restaurant recommendation response.",
-        model="openai/openai/gpt-4o",
+        model=Models.GPT_4O,
         min_score=1,
         max_score=5,
     )
@@ -59,11 +61,11 @@ def managing_judges_demo(client) -> Judge:
     print("Changing the judge spec")
     new_judge = client.judges.get(new_judge_id)
     new_judge.judgeSpec["min_score"] = 2
-    new_judge.judgeSpec["model"] = "openai/openai/gpt-4o-mini"
+    new_judge.judgeSpec["model"] = Models.GPT_4O_MINI
     print(new_judge.judgeSpec)
     updated_judge = client.judges.update_judge(new_judge.id, judge_spec=JudgeSpec(**new_judge.judgeSpec))
     completion_request = {
-        "model": "openai/openai/gpt-4o-mini",
+        "model": Models.GPT_4O_MINI,
         "messages": [{"role": "user", "content": "What is the capital of France?"}],
     }
 
@@ -142,7 +144,7 @@ def managing_routers_demo(client):
     print("Listing routers:")
     routers = client.routers.list()
     print("Found %d routers" % len(routers))
-    base_model = "openai/openai/gpt-4o"
+    base_model = Models.GPT_4O
     new_router_id = "new-super-router"
     new_router = client.routers.get(new_router_id)
     if not new_router:
@@ -162,7 +164,7 @@ def managing_routers_demo(client):
                 'executor': {
                     'spec': {
                         'executor_type': 'ModelExecutor',
-                        'model_name': "openai/openai/gpt-4o"
+                        'model_name': Models.GPT_4O
                     }
                 }
             },
@@ -174,7 +176,7 @@ def managing_routers_demo(client):
                 'executor': {
                     'spec': {
                         'executor_type': 'ModelExecutor',
-                        'model_name': "openai/openai/gpt-4o"
+                        'model_name': Models.GPT_4O
                     }
                 }
             }
@@ -215,7 +217,7 @@ def train_router_demo(client, judge, openai_client):
         print(f"Creating new router {training_router_id} for training")
         training_router = client.routers.create_router(
             training_router_id,
-            base_model="openai/openai/gpt-4o",
+            base_model=Models.GPT_4O,
             description="Router for training with multiple models"
         )
     # Start training job with multiple models
@@ -224,9 +226,10 @@ def train_router_demo(client, judge, openai_client):
         router=training_router,
         judge=judge,
         llms=[
-            "openai/openai/gpt-4o",
-            "openai/openai/gpt-4o-mini",
-            "openai/openai/gpt-4.1-mini"
+            Models.GPT_4O_MINI,
+            Models.GPT_4_1_MINI,
+            Models.GEMINI_2_0_FLASH,
+            Models.CLAUDE_3_7_SONNET,
         ],
         requests=training_requests
     )
@@ -248,7 +251,7 @@ def train_router_demo(client, judge, openai_client):
             test_request = {
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": "What is the best way to learn Python?"}
+                    {"role": "user", "content": "What is the capital of Germany?"}
                 ]
             }
 
@@ -309,14 +312,14 @@ def main():
 
     print("Getting credit balance:")
     print(client.org_id)
-    credit_balance = client.organization.get_credit_balance()
-    print(credit_balance)
+    # credit_balance = client.organization.get_credit_balance()
+    # print(credit_balance)
 
     judge = managing_judges_demo(client)
 
     # Prepare the OpenAI chat completion request
     openai_completion_request = {
-        "model": "openai/openai/gpt-4o-mini",
+        "model": Models.GPT_4O_MINI,
         "messages": [
             {
                 "role": "user",
@@ -326,7 +329,7 @@ def main():
         "max_tokens": 100
     }
 
-    openai_evaluation_demo(client, openai_client, judge, openai_completion_request)
+    # openai_evaluation_demo(client, openai_client, judge, openai_completion_request)
 
     updated_router = managing_routers_demo(client)
     # uncomment if you want to just use router
