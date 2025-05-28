@@ -99,9 +99,20 @@ class RubricJudgeSpec:
     extract_judgement: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert the judge specification to a dictionary format suitable for API requests.
+
+        This method serializes the specification, removing any None values to ensure
+        only meaningful configuration is sent to the API.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing all non-None attributes of this
+                specification, ready to be sent to the API.
+        """
         result = dataclasses.asdict(self)
         # Filter out None values.
         return {k: v for k, v in result.items() if v is not None}
 
 
+# For backward compatibility and future extensibility, JudgeSpec is an alias for RubricJudgeSpec.
+# If we add other types of judges in the future, this will become a Union type.
 JudgeSpec = RubricJudgeSpec
