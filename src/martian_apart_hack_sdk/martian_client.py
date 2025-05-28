@@ -17,7 +17,7 @@ class MartianClient:
     api_url: str
     api_key: str
     org_id: Optional[str] = None
-    httpx_factory: dataclasses.InitVar[type[httpx.Client]] = httpx.Client
+    httpx_client_factory: dataclasses.InitVar[type[httpx.Client]] = httpx.Client
 
     def __post_init__(self, httpx_client_factory):
         if self.org_id is None:
