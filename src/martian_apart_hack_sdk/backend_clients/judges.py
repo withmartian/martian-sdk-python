@@ -129,12 +129,3 @@ class JudgesClient:
         )
         resp.raise_for_status()
         return JudgeEvaluation(**resp.json()["judgement"])
-
-    # # U  (full or PATCH-style partial)
-    # def update(self, judge_id: str, **fields) -> "Judge":
-    #     resp = self._client.patch(f"/judges/{judge_id}", json=fields).json()
-    #     return Judge(**resp, _http=self._client)
-
-    # # D
-    # def delete(self, judge_id: str) -> None:
-    #     self._client.delete(f"/judges/{judge_id}")

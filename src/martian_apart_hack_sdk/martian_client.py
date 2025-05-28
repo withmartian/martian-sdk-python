@@ -2,6 +2,7 @@
 
 import dataclasses
 import functools
+from typing import Optional
 
 import httpx
 
@@ -14,8 +15,24 @@ from martian_apart_hack_sdk.backend_clients import organization as organization_
 @dataclasses.dataclass(frozen=True)
 class MartianClient:
     api_url: str
-    org_id: str
     api_key: str
+    org_id: Optional[str] = None
+
+    def __post_init__(self):
+        if self.org_id is None:
+            object.__setattr__(self, 'org_id', self._get_org_id())
+
+    def _get_org_id(self) -> str:
+        """Get the organization ID from the API.
+        
+        Returns:
+            str: The organization ID
+        """
+        client = httpx.Client(base_url=self.api_url, headers=self._headers(), follow_redirects=True)
+        response = client.get("/organizations")
+        if response.status_code != 200:
+            raise ValueError(f"Failed to get org id: {response.status_code} {response.text}")
+        return response.json()[0]["uid"]
 
     def _headers(self) -> dict[str, str]:
         return {
