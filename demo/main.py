@@ -6,6 +6,7 @@ Example usage:
 
 """
 import dotenv
+import logging
 
 from martian_apart_hack_sdk.resources.judge import Judge
 import openai
@@ -24,6 +25,11 @@ from martian_apart_hack_sdk.models.RouterConstraints import (
     ConstraintValue,
 )
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 def managing_judges_demo(client) -> Judge:
     """Demonstrates judge management operations including creation, updating, and evaluation.
@@ -177,11 +183,12 @@ def main():
         base_url=config.openai_api_url,
     )
 
-    print("Getting credit balance:")
-    credit_balance = client.organization.get_credit_balance()
-    print(credit_balance)
+    # print("Getting credit balance:")
+    # print(client.org_id)
+    # credit_balance = client.organization.get_credit_balance()
+    # print(credit_balance)
 
-    judge = managing_judges_demo(client)
+    # judge = managing_judges_demo(client)
 
     # Prepare the OpenAI chat completion request
     openai_completion_request = {

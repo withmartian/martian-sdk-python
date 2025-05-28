@@ -1,17 +1,23 @@
 """Router API client functions."""
 
-import dataclasses
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
+import dataclasses
+import time
+import logging
 import openai
 import httpx
+from datetime import datetime, timedelta
 from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.resources import router as router_resource
 from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint, render_extra_body_router_constraint
+from martian_apart_hack_sdk.resources.judge import Judge
 from martian_apart_hack_sdk.resources.router import Router
+from martian_apart_hack_sdk.models.RouterTrainingJob import RouterTrainingJob
 from openai.resources.chat.completions import completions
 
+logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass(frozen=True)
 class RoutersClient:
@@ -156,5 +162,81 @@ class RoutersClient:
             timeout=self.config.evaluation_timeout,
         )
         return response
+
+    def run_training_job(
+        self,
+        router: Router,
+        judge: Judge,
+        llms: List[str],
+        requests: List[Dict[str, Any]],
+    ) -> RouterTrainingJob:
+        """Run a training job for a router with the specified parameters.
+        
+        Args:
+            router: The router to train
+            judge: The judge to use for evaluation
+            llms: List of LLM model names to use
+            requests: List of request objects containing messages for training
+            
+        Returns:
+            The training job response data
+            
+        Raises:
+            httpx.HTTPError: If the request fails
+        """
+        payload = {
+            "routerName": router.name,
+            "judgeName": judge.name,
+            "llms": llms,
+            "requests": requests
+        }
+        
+        resp = self.httpx.post("/router_training_jobs", json=payload)
+        resp.raise_for_status()
+        return RouterTrainingJob.from_dict(resp.json())
+
+    def poll_training_job(
+        self,
+        job_name: str,
+        poll_interval: int = 10,
+        poll_timeout: int = 20 * 60  # 20 minutes in seconds
+    ) -> RouterTrainingJob:
+        """Poll a training job until it completes or fails.
+        
+        Args:
+            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
+            poll_interval: Number of seconds to wait between polls (default: 10)
+            poll_timeout: Maximum time to poll in seconds (default: 20 minutes)
+            
+        Returns:
+            The final RouterTrainingJob instance
+            
+        Raises:
+            httpx.HTTPError: If the request fails
+            TimeoutError: If the job doesn't complete within the timeout period
+        """
+        # Extract job ID from full name if needed
+        job_id = job_name.split('/')[-1] if '/' in job_name else job_name
+        
+        start_time = datetime.now()
+        timeout_time = start_time + timedelta(seconds=poll_timeout)
+        
+        while True:
+            current_time = datetime.now()
+            if current_time > timeout_time:
+                raise TimeoutError(f"Training job {job_id} did not complete within {poll_timeout} seconds")
+            
+            resp = self.httpx.get(f"/router_training_jobs/{job_id}")
+            resp.raise_for_status()
+            job = RouterTrainingJob.from_dict(resp.json())
+            
+            elapsed = current_time - start_time
+            logger.info(f"Training job {job_id} status: {job.status} (elapsed: {elapsed})")
+            
+            if job.status in ["SUCCESS", "FAILED"]:
+                logger.info(f"Training job {job_id} completed with status: {job.status}")
+                return job
+                
+            time.sleep(poll_interval)
 
     
