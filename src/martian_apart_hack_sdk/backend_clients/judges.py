@@ -77,6 +77,7 @@ class JudgesClient:
 
     def get_versions(self, judge_id: str) -> List[judge_resource.Judge]:
         resp = self.httpx.get(f"/judges/{judge_id}/versions")
+        resp.raise_for_status()
         if not resp.json()["judges"]:
             raise ResourceNotFoundError(f"Judge with id {judge_id} does not exist")
         return [self._init_judge(j) for j in resp.json()["judges"]]
