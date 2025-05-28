@@ -19,8 +19,12 @@ class MartianClient:
     
     Args:
         api_url (str): The base URL for the Martian API.
-        org_id (str): The ID of the organization to use.
         api_key (str): The API key to use for authentication.
+        org_id (Optional[str], optional): The organization ID to use for authentication. If not provided, the organization ID will be fetched from the API.
+        
+    Notes:
+        The MartianClient is a singleton. You should not create multiple instances of the MartianClient.
+        
     """
 
     api_url: str

@@ -105,7 +105,12 @@ class JudgesClient:
         
         Args:
             judge_id (str): The ID of the judge to get.
-            version (Optional[int], optional): The version of the judge to get.
+            version (Optional[int], optional): The version of the judge to get. If not provided, the latest version will be returned.
+
+        Returns:
+            judge_resource.Judge: The judge resource. OR None if the judge does not exist.
+
+        
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)

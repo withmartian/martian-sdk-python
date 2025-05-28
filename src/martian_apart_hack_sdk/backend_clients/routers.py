@@ -8,7 +8,7 @@ import logging
 import openai
 import httpx
 from datetime import datetime, timedelta
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.resources import router as router_resource
 from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint, render_extra_body_router_constraint
@@ -67,10 +67,10 @@ class RoutersClient:
             router_resource.Router: The newly created router resource.
 
         Raises:
-            ResourceNotFoundError: If a router with the given ID already exists.
+            ResourceAlreadyExistsError: If a router with the given ID already exists.
         """
         if self._is_router_exists(router_id):
-            raise ResourceNotFoundError(f"Router with id {router_id} already exists")
+            raise ResourceAlreadyExistsError(f"Router with id {router_id} already exists")
         router_spec = {
             'points': [
                 self._get_model_executor(base_model, x=0.0, y=0.0),
@@ -150,10 +150,10 @@ class RoutersClient:
 
         Args:
             router_id (str): The ID of the router to retrieve.
-            version (Optional[int], optional): The specific version of the router to retrieve.
+            version (Optional[int], optional): The specific version of the router to retrieve. If not provided, the latest version will be returned.
 
         Returns:
-            Optional[Router]: The requested router if found, None otherwise.
+            router_resource.Router: The router resource. OR None if the router does not exist.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
