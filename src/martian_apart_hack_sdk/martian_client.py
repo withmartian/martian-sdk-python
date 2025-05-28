@@ -31,13 +31,13 @@ class MartianClient:
         object.__setattr__(self, 'organization',
                            organization_client.OrganizationClient(organization_httpx, self._config))
 
-    def _get_org_id(self, httpx_factory) -> str:
+    def _get_org_id(self, httpx_client_factory) -> str:
         """Get the organization ID from the API.
 
         Returns:
             str: The organization ID
         """
-        client = httpx_factory(base_url=self.api_url, headers=self._headers(), follow_redirects=True)
+        client = httpx_client_factory(base_url=self.api_url, headers=self._headers(), follow_redirects=True)
         response = client.get("/organizations")
         if response.status_code != 200:
             raise ValueError(f"Failed to get org id: {response.status_code} {response.text}")
