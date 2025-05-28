@@ -193,7 +193,12 @@ class RoutersClient:
         
         resp = self.httpx.post("/router_training_jobs", json=payload)
         resp.raise_for_status()
-        return RouterTrainingJob.from_dict(resp.json())
+        job = RouterTrainingJob.from_dict(resp.json())
+        logger.info(
+            "Started training job %s for router %s with judge %s and LLMs: %s",
+            job.name, router.name, judge.name, llms
+        )
+        return job
 
     def poll_training_job(
         self,
@@ -231,10 +236,13 @@ class RoutersClient:
             job = RouterTrainingJob.from_dict(resp.json())
             
             elapsed = current_time - start_time
-            logger.info(f"Training job {job_id} status: {job.status} (elapsed: {elapsed})")
+            logger.info("Training job %s status: %s (elapsed: %s)", job_id, job.status, elapsed)
+
+            if job.status == "FAILURE_WITHOUT_RETRY":
+                logger.info("Job failed. All attempts have been exhausted.")
             
-            if job.status in ["SUCCESS", "FAILED"]:
-                logger.info(f"Training job {job_id} completed with status: {job.status}")
+            if job.status in ["SUCCESS", "FAILURE_WITHOUT_RETRY", "FAILURE"]:
+                logger.info("Training job %s completed with status: %s", job_id, job.status)
                 return job
                 
             time.sleep(poll_interval)
