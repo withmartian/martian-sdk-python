@@ -27,7 +27,7 @@ from martian_apart_hack_sdk.models.RouterConstraints import (
 
 def managing_judges_demo(client) -> Judge:
     """Demonstrates judge management operations including creation, updating, and evaluation.
-    
+
     Args:
         client: MartianClient instance
     Returns:
@@ -94,7 +94,7 @@ def managing_judges_demo(client) -> Judge:
 
 def openai_evaluation_demo(client, openai_client, judge, openai_completion_request):
     """Demonstrates OpenAI evaluation using a judge.
-    
+
     Args:
         client: MartianClient instance
         openai_client: OpenAI client instance
@@ -104,7 +104,7 @@ def openai_evaluation_demo(client, openai_client, judge, openai_completion_reque
     print("Testing OpenAI evaluation")
     # Call OpenAI to get the response
     openai_chat_completion_response = openai_client.chat.completions.create(**openai_completion_request)
-    
+
     # Judge the OpenAI response using the existing judge
     print("Judging OpenAI response to 'how to grow potatos on Mars'")
     mars_evaluation_result = client.judges.evaluate_judge(
