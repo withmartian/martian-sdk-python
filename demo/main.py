@@ -307,10 +307,10 @@ def main():
         base_url=config.openai_api_url,
     )
 
-    # print("Getting credit balance:")
-    # print(client.org_id)
-    # credit_balance = client.organization.get_credit_balance()
-    # print(credit_balance)
+    print("Getting credit balance:")
+    print(client.org_id)
+    credit_balance = client.organization.get_credit_balance()
+    print(credit_balance)
 
     judge = managing_judges_demo(client)
 
