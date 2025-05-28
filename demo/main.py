@@ -312,8 +312,8 @@ def main():
 
     print("Getting credit balance:")
     print(client.org_id)
-    # credit_balance = client.organization.get_credit_balance()
-    # print(credit_balance)
+    credit_balance = client.organization.get_credit_balance()
+    print(credit_balance)
 
     judge = managing_judges_demo(client)
 
@@ -329,7 +329,7 @@ def main():
         "max_tokens": 100
     }
 
-    # openai_evaluation_demo(client, openai_client, judge, openai_completion_request)
+    openai_evaluation_demo(client, openai_client, judge, openai_completion_request)
 
     updated_router = managing_routers_demo(client)
     # uncomment if you want to just use router
