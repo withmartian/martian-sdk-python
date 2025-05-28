@@ -2,18 +2,9 @@
 
 import dataclasses
 import json
-import httpx
 from typing import Dict, Any
 
 import dotenv
-
-def get_org_id(api_url: str, api_key: str) -> str:
-    client = httpx.Client(base_url=api_url, headers={"Authorization": f"Bearer {api_key}"}, follow_redirects=True)
-    response = client.get("/organizations")
-    if response.status_code != 200:
-        raise ValueError(f"Failed to get org id: {response.status_code} {response.text}")
-    return response.json()[0]["uid"]
-
 
 @dataclasses.dataclass(frozen=True)
 class ClientConfig:
@@ -45,8 +36,6 @@ def load_config() -> ClientConfig:
         raise ValueError("MARTIAN_API_URL not set in .env")
     if api_key is None:
         raise ValueError("MARTIAN_API_KEY not set in .env")
-    if org_id is None:
-        org_id = get_org_id(api_url, api_key)
 
     return ClientConfig(
         api_url=api_url,

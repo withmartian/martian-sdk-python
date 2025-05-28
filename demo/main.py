@@ -157,7 +157,7 @@ def managing_routers_demo(client):
             }
         ]
     }
-    updated_router = client.routers.update_router("new-super-router-id", updated_router_spec,
+    updated_router = client.routers.update_router(new_router_id, updated_router_spec,
                                                   description="It's a new cool router")
     print(updated_router)
     return updated_router
@@ -234,6 +234,10 @@ def main():
     print(f"Evaluating router {updated_router.name} response with judge: {judge.id}")
     judge_score = client.judges.evaluate_judge(judge, completion_request=openai_completion_request, completion_response=response)
     print(f"Judge score: {judge_score}")
+
+    # fix that
+    print(f"Running router via run method with quality_constraint")
+    client.routers.run(updated_router.id, routing_constraint=quality_constraint, completion_request=openai_completion_request)
 
     # print("\nTesting router via OpenAI client with both quality and cost in extra_body:")
     # response = openai_client.chat.completions.create(
