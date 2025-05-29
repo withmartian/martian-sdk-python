@@ -22,9 +22,13 @@ class MartianClient:
         api_key (str): The API key to use for authentication.
         org_id (Optional[str], optional): The organization ID to use for authentication. If not provided, the organization ID will be fetched from the API.
         
+    Attributes:
+        organization (OrganizationClient): Client for organization-specific operations like checking credits.
+        judges (JudgesClient): Client for creating, updating, and managing judges.
+        routers (RoutersClient): Client for creating, updating, and managing routers.
+        
     Notes:
         The MartianClient is a singleton. You should not create multiple instances of the MartianClient.
-        
     """
 
     api_url: str
@@ -35,7 +39,7 @@ class MartianClient:
     def __post_init__(self, httpx_client_factory):
         if self.org_id is None:
             object.__setattr__(self, 'org_id', self._get_org_id(httpx_client_factory))
-        object.__setattr__(self, '_client', httpx_client_factory(base_url=self.base_url, headers=self._headers()))
+        object.__setattr__(self, '_client', httpx_client_factory(base_url=self._base_url, headers=self._headers()))
         self._init_organization_client(httpx_client_factory)
 
     def _init_organization_client(self, httpx_client_factory):
@@ -64,20 +68,23 @@ class MartianClient:
         }
 
     @functools.cached_property
-    def base_url(self) -> str:
-        """Returns the base URL for the Martian API."""
-        
+    def _base_url(self) -> str:
+        """Get the base URL for API requests.
+
+        Returns:
+            str: The base URL in the format "{api_url}/v1/organizations/{org_id}".
+                For example, if api_url is "https://api.martian.com" and org_id is "my-org",
+                the base URL would be "https://api.martian.com/v1/organizations/my-org".
+        """
         return f"{self.api_url}/v1/organizations/{self.org_id}"
 
 
     @functools.cached_property
     def judges(self) -> judges_client.JudgesClient:
-        """Returns the Martian Judges client, which can be used to create, update, and list judges."""
         return judges_client.JudgesClient(self._client, self._config)
 
     @functools.cached_property
     def routers(self) -> routers_client.RoutersClient:
-        """Returns the Martian Routers client, which can be used to create, update, and list routers."""
         return routers_client.RoutersClient(self._client, self._config)
 
     @functools.cached_property

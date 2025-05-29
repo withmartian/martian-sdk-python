@@ -68,6 +68,8 @@ class RoutersClient:
 
         Raises:
             ResourceAlreadyExistsError: If a router with the given ID already exists.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if self._is_router_exists(router_id):
             raise ResourceAlreadyExistsError(f"Router with id {router_id} already exists")
@@ -123,6 +125,8 @@ class RoutersClient:
 
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router_id):
             raise ResourceNotFoundError(f"Router with id {router_id} not found")
@@ -140,6 +144,10 @@ class RoutersClient:
 
         Returns:
             list[router_resource.Router]: A list of all available routers.
+
+        Raises:
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get("/routers")
         resp.raise_for_status()
@@ -154,6 +162,10 @@ class RoutersClient:
 
         Returns:
             router_resource.Router: The router resource. OR None if the router does not exist.
+
+        Raises:
+            httpx.HTTPError: If the request fails for reasons other than a missing router.
+            httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
@@ -177,12 +189,13 @@ class RoutersClient:
             completion_request (Dict[str, Any]): The completion request parameters.
             version (Optional[int], optional): Optional router version to use.
 
-
         Returns:
             str: The router's response string.
 
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router.id):
             raise ResourceNotFoundError(f"Router with id {router.id} not found")
@@ -216,19 +229,63 @@ class RoutersClient:
         llms: List[str],
         requests: List[Dict[str, Any]],
     ) -> RouterTrainingJob:
-        """Run a training job for a router with the specified parameters.
+        """Train a router for a given set of models, using a judge and list of completion requests.
 
         Args:
-            router: The router to train
-            judge: The judge to use for evaluation
-            llms: List of LLM model names to use
-            requests: List of request objects containing messages for training
-
+            router (Router): The router to train.
+            judge (Judge): The judge to use for evaluation.
+            llms (List[str]): List of LLM model names to use.
+            requests (List[Dict[str, Any]]): List of request objects containing messages for training.
+            
         Returns:
-            The training job response data
+            RouterTrainingJob: The training job response metadata.
 
+            Note: The response metadata contains information about the training job itself,
+            but does not contain any information about the results of training or router configuration.
+            
         Raises:
-            httpx.HTTPError: If the request fails
+            ResourceNotFoundError: If the router or judge doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
+
+        Examples:
+            Create a simple judge and router, then train the router using example requests:
+            
+            >>> # Create a basic judge that evaluates response quality
+            >>> judge_spec = RubricJudgeSpec(
+            ...     model_type="rubric_judge",
+            ...     model="gpt-4",
+            ...     rubric="Rate the response quality from 1-10 based on accuracy and completeness.",
+            ...     min_score=1,
+            ...     max_score=10
+            ... )
+            >>> judge = client.judges.create("quality_judge", judge_spec)
+            >>> 
+            >>> # Create a simple router
+            >>> router = client.routers.create("test_router", RouterSpec(...))
+            >>> 
+            >>> # Example training requests
+            >>> requests = [
+            ...     {
+            ...         "messages": [
+            ...             {"role": "user", "content": "What is Python?"}
+            ...         ]
+            ...     },
+            ...     {
+            ...         "messages": [
+            ...             {"role": "system", "content": "You are a machine learning expert who explains concepts clearly and concisely."},
+            ...             {"role": "user", "content": "Explain machine learning."}
+            ...         ]
+            ...     }
+            ... ]
+            >>> 
+            >>> # Train the router
+            >>> training_job = client.routers.run_training_job(
+            ...     router=router,
+            ...     judge=judge,
+            ...     llms=["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o"],
+            ...     requests=requests
+            ... )
         """
         payload = {
             "routerName": router.name,
@@ -255,16 +312,34 @@ class RoutersClient:
         """Poll a training job until it completes or fails.
 
         Args:
-            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
-            poll_interval: Number of seconds to wait between polls (default: 10)
-            poll_timeout: Maximum time to poll in seconds (default: 20 minutes)
-
+            job_name (str): The job name or ID. If it contains '/' it's treated as a full name
+                (e.g. 'organizations/org-name/router_training_jobs/job-id') and the last part is used as ID.
+            poll_interval (int, optional): Number of seconds to wait between polls. Defaults to 10.
+            poll_timeout (int, optional): Maximum time to poll in seconds. Defaults to 1200 (20 minutes).
+            
         Returns:
-            The final RouterTrainingJob instance
-
+            RouterTrainingJob: The final training job state. Check the `status` field to determine
+                if the job completed successfully ("SUCCESS") or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
+            
         Raises:
-            httpx.HTTPError: If the request fails
-            TimeoutError: If the job doesn't complete within the timeout period
+            httpx.HTTPError: If any API request fails.
+            TimeoutError: If the job doesn't complete within the poll_timeout period.
+
+        Examples:
+            >>> # Start a training job
+            >>> training_job = client.routers.run_training_job(...)
+            >>> 
+            >>> # Poll until completion
+            >>> final_job = client.routers.poll_training_job(
+            ...     job_name=training_job.name,
+            ...     poll_interval=15,    # Check every 15 seconds
+            ...     poll_timeout=600     # Wait up to 10 minutes
+            ... )
+            >>> 
+            >>> if final_job.status == "SUCCESS":
+            ...     print("Training completed successfully!")
+            ... else:
+            ...     print(f"Training failed with status: {final_job.status}")
         """
         # Extract job ID from full name if needed
         job_id = job_name.split('/')[-1] if '/' in job_name else job_name
@@ -295,13 +370,21 @@ class RoutersClient:
         self,
         job_name: str,
     ) -> RouterTrainingJob:
-        """Poll status of a training job.
+        """Get the current status of a training job.
 
         Args:
-            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
+            job_name (str): The job name or ID. If it contains '/' it's treated as a full name
+                (e.g. 'organizations/org-name/router_training_jobs/job-id') and the last part is used as ID.
 
         Returns:
-            The final RouterTrainingJob instance
+            RouterTrainingJob: The current state of the training job. Check the `status` field to determine
+                if the job is still running ("RUNNING"), completed successfully ("SUCCESS"), 
+                or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
+
+        Raises:
+            ResourceNotFoundError: If the training job doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         job_id = job_name.split('/')[-1] if '/' in job_name else job_name
         resp = self.httpx.get(f"/router_training_jobs/{job_id}")

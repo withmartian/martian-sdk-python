@@ -55,6 +55,14 @@ class JudgesClient:
             judge_id (str): An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
             judge_spec (Union[judge_specs.JudgeSpec, Dict[str, Any]]): The specification for the judge.
             description (Optional[str], optional): The description of the judge, for your own reference.
+
+        Returns:
+            judge_resource.Judge: The newly created judge resource.
+
+        Raises:
+            ResourceAlreadyExistsError: If a judge with the given ID already exists.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
 
         if self._is_judge_exists(judge_id):
@@ -79,10 +87,16 @@ class JudgesClient:
             judge_spec (judge_specs.JudgeSpec): The new specification for the judge.
 
         Returns:
-            The new version of the judge.
+            judge_resource.Judge: The new version of the judge. 
+            
+            Judge updates are non-destructive. The updated judge will have an incremented version number. 
+            You can use this version number to reference the judge in other API calls. 
+            You can also access previous versions of the judge by passing the previous version number to the `get` method.
 
-            Note: Judge updates are non-destructive. The updated judge will have an incremented version number. You can use this version number to reference the judge in other API calls.
-            You can also access previous versions of the judge by passing the previous verison number to the `get` method.
+        Raises:
+            ResourceNotFoundError: If the judge with the given ID does not exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         payload = self._get_judge_spec_payload(judge_spec.to_dict())
         # can't update labels/description in API
@@ -91,17 +105,21 @@ class JudgesClient:
         return self._init_judge(json_data=resp.json())
 
     def list(self) -> list[judge_resource.Judge]:
-        """List all judges.
+        """List all judges in your organization.
         
         Returns:
-            A list of all judges.
+            list[judge_resource.Judge]: A list of all judges.
+
+        Raises:
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get("/judges")
         resp.raise_for_status()
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
     def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:
-        """Get a judge.
+        """Get a specific judge by ID and optionally version.
         
         Args:
             judge_id (str): The ID of the judge to get.
@@ -110,7 +128,9 @@ class JudgesClient:
         Returns:
             judge_resource.Judge: The judge resource. OR None if the judge does not exist.
 
-        
+        Raises:
+            httpx.HTTPError: If the request fails for reasons other than a missing judge.
+            httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
@@ -120,6 +140,22 @@ class JudgesClient:
         return self._init_judge(resp.json())
 
     def get_versions(self, judge_id: str) -> List[judge_resource.Judge]:
+        """Get all versions of a specific judge.
+        
+        Each time a judge is updated, a new version is created. This method returns all versions
+        of a judge, ordered from newest to oldest.
+        
+        Args:
+            judge_id (str): The ID of the judge to get versions for.
+
+        Returns:
+            List[judge_resource.Judge]: A list of all versions of the judge, ordered from newest to oldest.
+
+        Raises:
+            ResourceNotFoundError: If the judge with the given ID does not exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
+        """
         resp = self.httpx.get(f"/judges/{judge_id}/versions")
         resp.raise_for_status()
         if not resp.json()["judges"]:
@@ -130,12 +166,27 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> str:
-        """
-        This method render judging prompt. It works only for rubric judge
-        :param judge:
-        :param completion_request:
-        :param completion_response:
-        :return: str: rendered prompt
+        """Render the judging prompt for a judge.
+
+        Concatenates the judge's prescript, rubric, and postscript;
+        evaluates variables in the prompt (e.g. `${min_score}`, `${max_score}`, `${content}`);
+        and returns the rendered prompt. 
+        
+        This is useful for debugging or for getting a sense of what the judge will see,
+        without having to run the judge or call the API.
+        
+        Args:
+            judge (judge_resource.Judge): The judge to render the prompt for.
+            completion_request (Dict[str, Any]): The completion request parameters that would be sent to the LLM.
+            completion_response (chat_completion.ChatCompletion): The completion response from the LLM.
+
+        Returns:
+            str: The rendered prompt that would be sent to the Judge.
+
+        Raises:
+            ResourceNotFoundError: If the judge with the given ID does not exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out based on evaluation_timeout config.
         """
         payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
         resp = self.httpx.post(
@@ -177,6 +228,27 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
+        """Evaluate an LLM response using a specific judge.
+
+        This method sends the completion request and response to the judge for evaluation.
+        The judge will assess the response based on its rubric and return a structured evaluation.
+
+        Args:
+            judge (judge_resource.Judge): The judge to use for evaluation.
+            completion_request (Dict[str, Any]): The original completion request parameters that were sent to the LLM.
+            completion_response (chat_completion.ChatCompletion): The completion response from the LLM to evaluate.
+
+        Returns:
+            JudgeEvaluation: The evaluation results, including:
+                - score: The numerical score assigned by the judge
+                - reasoning: The judge's explanation for the score
+                - metadata: Additional evaluation metadata
+
+        Raises:
+            ResourceNotFoundError: If the judge with the given ID does not exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out based on evaluation_timeout config.
+        """
         payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
         resp = self.httpx.post(
             f"/judges/{judge.id}:evaluate",
@@ -192,6 +264,27 @@ class JudgesClient:
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> JudgeEvaluation:
+        """Evaluate an LLM response using a judge specification directly.
+
+        Similar to evaluate(), but instead of using a saved judge, this method accepts a judge
+        specification directly. This is useful for testing new judge specifications before
+        creating a permanent judge.
+
+        Args:
+            judge_spec (Dict[str, Any]): The judge specification to use for evaluation.
+            completion_request (Dict[str, Any]): The original completion request parameters that were sent to the LLM.
+            completion_response (chat_completion.ChatCompletion): The completion response from the LLM to evaluate.
+
+        Returns:
+            JudgeEvaluation: The evaluation results, including:
+                - score: The numerical score assigned by the judge
+                - reasoning: The judge's explanation for the score
+                - metadata: Additional evaluation metadata
+
+        Raises:
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out based on evaluation_timeout config.
+        """
         request_payload = utils.get_evaluation_json_payload(completion_request)
         completion_payload = utils.get_evaluation_json_payload(
             self._ensure_cost_response_in_completion(completion_response)
