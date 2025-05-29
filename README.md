@@ -59,7 +59,7 @@ martian-hackathon/          # Root directory for all hackathon work
    EOL
    ```
 
-   (See `martian-sdk-python/.env-template`)
+   (See `martian-sdk-python/.env.template`)
 
 ### Running the Quickstart Guide
 
