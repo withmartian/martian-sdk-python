@@ -62,6 +62,7 @@ class JudgesClient:
         Raises:
             ResourceAlreadyExistsError: If a judge with the given ID already exists.
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
 
         if self._is_judge_exists(judge_id):
@@ -95,6 +96,7 @@ class JudgesClient:
         Raises:
             ResourceNotFoundError: If the judge with the given ID does not exist.
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         payload = self._get_judge_spec_payload(judge_spec.to_dict())
         # can't update labels/description in API
@@ -110,6 +112,7 @@ class JudgesClient:
 
         Raises:
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get("/judges")
         resp.raise_for_status()
@@ -127,6 +130,7 @@ class JudgesClient:
 
         Raises:
             httpx.HTTPError: If the request fails for reasons other than a missing judge.
+            httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
@@ -150,6 +154,7 @@ class JudgesClient:
         Raises:
             ResourceNotFoundError: If the judge with the given ID does not exist.
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get(f"/judges/{judge_id}/versions")
         resp.raise_for_status()

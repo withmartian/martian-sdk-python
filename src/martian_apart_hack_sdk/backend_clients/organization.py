@@ -30,6 +30,7 @@ class OrganizationClient:
 
         Raises:
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get(
             '/credits'

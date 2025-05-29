@@ -68,6 +68,8 @@ class RoutersClient:
 
         Raises:
             ResourceAlreadyExistsError: If a router with the given ID already exists.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if self._is_router_exists(router_id):
             raise ResourceAlreadyExistsError(f"Router with id {router_id} already exists")
@@ -123,6 +125,8 @@ class RoutersClient:
 
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router_id):
             raise ResourceNotFoundError(f"Router with id {router_id} not found")
@@ -140,6 +144,10 @@ class RoutersClient:
 
         Returns:
             list[router_resource.Router]: A list of all available routers.
+
+        Raises:
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         resp = self.httpx.get("/routers")
         resp.raise_for_status()
@@ -154,6 +162,10 @@ class RoutersClient:
 
         Returns:
             router_resource.Router: The router resource. OR None if the router does not exist.
+
+        Raises:
+            httpx.HTTPError: If the request fails for reasons other than a missing router.
+            httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
@@ -177,12 +189,13 @@ class RoutersClient:
             completion_request (Dict[str, Any]): The completion request parameters.
             version (Optional[int], optional): Optional router version to use.
 
-
         Returns:
             str: The router's response string.
 
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router.id):
             raise ResourceNotFoundError(f"Router with id {router.id} not found")
@@ -227,7 +240,9 @@ class RoutersClient:
             but does not contain any information about the results of training or router configuration.
             
         Raises:
+            ResourceNotFoundError: If the router or judge doesn't exist.
             httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
 
         Examples:
             Create a simple judge and router, then train the router using example requests:
@@ -264,7 +279,7 @@ class RoutersClient:
             >>> training_job = client.routers.run_training_job(
             ...     router=router,
             ...     judge=judge,
-            ...     llms=["gpt-3.5-turbo", "gpt-4"],
+            ...     llms=["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o"],
             ...     requests=requests
             ... )
         """
@@ -351,13 +366,21 @@ class RoutersClient:
         self,
         job_name: str,
     ) -> RouterTrainingJob:
-        """Poll status of a training job.
+        """Get the current status of a training job.
 
         Args:
-            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
+            job_name (str): The job name or ID. If it contains '/' it's treated as a full name
+                (e.g. 'organizations/org-name/router_training_jobs/job-id') and the last part is used as ID.
 
         Returns:
-            The final RouterTrainingJob instance
+            RouterTrainingJob: The current state of the training job. Check the `status` field to determine
+                if the job is still running ("RUNNING"), completed successfully ("SUCCESS"), 
+                or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
+
+        Raises:
+            ResourceNotFoundError: If the training job doesn't exist.
+            httpx.HTTPError: If the request fails.
+            httpx.TimeoutException: If the request times out.
         """
         job_id = job_name.split('/')[-1] if '/' in job_name else job_name
         resp = self.httpx.get(f"/router_training_jobs/{job_id}")
