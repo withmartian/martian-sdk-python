@@ -236,7 +236,7 @@ def train_router_demo(client, judge, openai_client):
     print(f"Training job started: {training_job.name}")
     # Poll the training job until completion
     try:
-        final_job = client.routers.poll_training_job(
+        final_job = client.routers.wait_training_job(
             training_job.name,
             poll_interval=10,  # Poll every 10 seconds
             poll_timeout=30 * 60  # 30 minutes timeout

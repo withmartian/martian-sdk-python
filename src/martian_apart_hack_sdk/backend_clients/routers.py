@@ -28,7 +28,7 @@ class RoutersClient:
     Args:
         httpx (httpx.Client): The HTTP client to use for the API.
         config (utils.ClientConfig): The configuration for the API.
-    """     
+    """
 
     httpx: httpx.Client
     config: utils.ClientConfig
@@ -57,7 +57,7 @@ class RoutersClient:
             description: Optional[str] = None,
     ) -> router_resource.Router:
         """Create a router.
-        
+
         Args:
             router_id (str): An arbitrary identifier (chosen by you) for the router. You'll need to use this identifier to reference the router in other API calls.
             base_model (str): The base model to use for the router.
@@ -107,12 +107,12 @@ class RoutersClient:
             description: Optional[str] = None,
     ) -> router_resource.Router:
         """Update an existing router's specification and/or description.
-        
+
         Args:
             router_id (str): The ID of the router to update.
             router_spec (Dict[str, Any]): The new router specification.
             description (Optional[str], optional): Optional new description for the router.
-            
+
         Returns:
             router_resource.Router: The updated Router resource.
 
@@ -120,17 +120,17 @@ class RoutersClient:
             Router updates are non-destructive. The updated router will have an incremented version number.
             You can use this version number to reference the router in other API calls.
             You can also access previous versions of the router by passing the previous version number to the `get` method.
-            
+
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
         """
         if not self._is_router_exists(router_id):
             raise ResourceNotFoundError(f"Router with id {router_id} not found")
-            
+
         payload = self._get_router_spec_payload(router_spec)
         if description is not None:
             payload["description"] = description
-            
+
         resp = self.httpx.patch(f"/routers/{router_id}", json=payload)
         resp.raise_for_status()
         return self._init_router(json_data=resp.json())
@@ -170,17 +170,17 @@ class RoutersClient:
         version: Optional[int] = None,
     ) -> completions.ChatCompletion:
         """Run a router with the given constraints and completion request.
-        
+
         Args:
             router_id (str): The ID of the router to run.
             routing_constraint (RoutingConstraint): The routing constraints to apply.
             completion_request (Dict[str, Any]): The completion request parameters.
             version (Optional[int], optional): Optional router version to use.
 
-            
+
         Returns:
             str: The router's response string.
-            
+
         Raises:
             ResourceNotFoundError: If the router doesn't exist.
         """
@@ -213,16 +213,16 @@ class RoutersClient:
         requests: List[Dict[str, Any]],
     ) -> RouterTrainingJob:
         """Run a training job for a router with the specified parameters.
-        
+
         Args:
             router: The router to train
             judge: The judge to use for evaluation
             llms: List of LLM model names to use
             requests: List of request objects containing messages for training
-            
+
         Returns:
             The training job response data
-            
+
         Raises:
             httpx.HTTPError: If the request fails
         """
@@ -232,7 +232,7 @@ class RoutersClient:
             "llms": llms,
             "requests": requests
         }
-        
+
         resp = self.httpx.post("/router_training_jobs", json=payload)
         resp.raise_for_status()
         job = RouterTrainingJob.from_dict(resp.json())
@@ -242,51 +242,65 @@ class RoutersClient:
         )
         return job
 
-    def poll_training_job(
+    def wait_training_job(
         self,
         job_name: str,
         poll_interval: int = 10,
         poll_timeout: int = 20 * 60  # 20 minutes in seconds
     ) -> RouterTrainingJob:
         """Poll a training job until it completes or fails.
-        
+
         Args:
             job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
             poll_interval: Number of seconds to wait between polls (default: 10)
             poll_timeout: Maximum time to poll in seconds (default: 20 minutes)
-            
+
         Returns:
             The final RouterTrainingJob instance
-            
+
         Raises:
             httpx.HTTPError: If the request fails
             TimeoutError: If the job doesn't complete within the timeout period
         """
         # Extract job ID from full name if needed
         job_id = job_name.split('/')[-1] if '/' in job_name else job_name
-        
+
         start_time = datetime.now()
         timeout_time = start_time + timedelta(seconds=poll_timeout)
-        
+
         while True:
             current_time = datetime.now()
             if current_time > timeout_time:
                 raise TimeoutError(f"Training job {job_id} did not complete within {poll_timeout} seconds")
-            
-            resp = self.httpx.get(f"/router_training_jobs/{job_id}")
-            resp.raise_for_status()
-            job = RouterTrainingJob.from_dict(resp.json())
-            
+
+            job = self.poll_training_job(job_id)
+
             elapsed = current_time - start_time
             logger.info("Training job %s status: %s (elapsed: %s)", job_id, job.status, elapsed)
 
             if job.status == "FAILURE_WITHOUT_RETRY":
                 logger.info("Job failed. All attempts have been exhausted.")
-            
+
             if job.status in ["SUCCESS", "FAILURE_WITHOUT_RETRY", "FAILURE"]:
                 logger.info("Training job %s completed with status: %s", job_id, job.status)
                 return job
-                
+
             time.sleep(poll_interval)
 
-    
+    def poll_training_job(
+        self,
+        job_name: str,
+    ) -> RouterTrainingJob:
+        """Poll status of a training job.
+
+        Args:
+            job_name: The job name or ID. If it contains '/' it's treated as a full name and the last part is used as ID
+
+        Returns:
+            The final RouterTrainingJob instance
+        """
+        job_id = job_name.split('/')[-1] if '/' in job_name else job_name
+        resp = self.httpx.get(f"/router_training_jobs/{job_id}")
+        resp.raise_for_status()
+        return RouterTrainingJob.from_dict(resp.json())
+
