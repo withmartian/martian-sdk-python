@@ -195,11 +195,15 @@ class RoutersClient:
         extra_body = {
             **render_extra_body_router_constraint(routing_constraint)
         }
-
-        # TODO Use routing version to run
+        if version is not None:
+            version_to_use = version
+        elif router.version is not None:
+            version_to_use = router.version
+        else:
+            version_to_use = "latest"
 
         response = openai_client.chat.completions.create(
-            **completion_request | {"model": router.name},
+            **completion_request | {"model": f"{router.name}/versions/{version_to_use}"},
             extra_body=extra_body,
             timeout=self.config.evaluation_timeout,
         )
