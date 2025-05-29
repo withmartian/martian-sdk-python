@@ -280,6 +280,15 @@ class RoutersClient:
 
             if job.status == "FAILURE_WITHOUT_RETRY":
                 logger.info("Job failed. All attempts have been exhausted.")
+                if job.error_message:
+                    logger.error("Error message: %s", job.error_message)
+                logger.info("Retry count: %d", job.retry_count)
+
+            if job.status == "FAILURE":
+                logger.info("Job failed.")
+                if job.error_message:
+                    logger.error("Error message: %s", job.error_message)
+                logger.info("Retry count: %d", job.retry_count)
 
             if job.status in ["SUCCESS", "FAILURE_WITHOUT_RETRY", "FAILURE"]:
                 logger.info("Training job %s completed with status: %s", job_id, job.status)

@@ -17,6 +17,8 @@ class RouterTrainingJob:
     create_time: datetime
     update_time: datetime
     llms: List[str]
+    error_message: Optional[str]
+    retry_count: int
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "RouterTrainingJob":
@@ -36,5 +38,7 @@ class RouterTrainingJob:
             status=data["status"],
             create_time=data["createTime"],
             update_time=data["updateTime"],
-            llms=data["llms"]
+            llms=data["llms"],
+            error_message=data.get("errorMessage"),
+            retry_count=data.get("retryCount", 0)
         ) 
