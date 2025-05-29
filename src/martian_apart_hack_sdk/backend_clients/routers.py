@@ -233,6 +233,8 @@ class RoutersClient:
         """
         if llms is None or not llms:
             raise InvalidParameterError("At least one LLM model name must be provided")
+        if not isinstance(llms, list):
+            raise InvalidParameterError("llms param must be a list of strings")
         llm_models = list(set(llms))
 
         payload = {
