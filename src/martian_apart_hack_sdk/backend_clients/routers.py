@@ -8,7 +8,7 @@ import logging
 import openai
 import httpx
 from datetime import datetime, timedelta
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
+from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError, InvalidParameterError
 from martian_apart_hack_sdk import utils
 from martian_apart_hack_sdk.resources import router as router_resource
 from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint, render_extra_body_router_constraint
@@ -209,6 +209,7 @@ class RoutersClient:
         )
         return response
 
+
     def run_training_job(
         self,
         router: Router,
@@ -230,10 +231,14 @@ class RoutersClient:
         Raises:
             httpx.HTTPError: If the request fails
         """
+        if llms is None or not llms:
+            raise InvalidParameterError("At least one LLM model name must be provided")
+        llm_models = list(set(llms))
+
         payload = {
             "routerName": router.name,
             "judgeName": judge.name,
-            "llms": llms,
+            "llms": llm_models,
             "requests": requests
         }
 
@@ -242,7 +247,7 @@ class RoutersClient:
         job = RouterTrainingJob.from_dict(resp.json())
         logger.info(
             "Started training job %s for router %s with judge %s and LLMs: %s",
-            job.name, router.name, judge.name, llms
+            job.name, router.name, judge.name, llm_models
         )
         return job
 
