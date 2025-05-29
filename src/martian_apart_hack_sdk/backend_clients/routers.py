@@ -233,6 +233,7 @@ class RoutersClient:
         payload = {
             "routerName": router.name,
             "judgeName": judge.name,
+            "judgeVersion": judge.version,
             "llms": llms,
             "requests": requests
         }
