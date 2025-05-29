@@ -3,6 +3,7 @@
 import dataclasses
 import json
 from typing import Dict, Any
+from pathlib import Path
 
 import dotenv
 
@@ -26,7 +27,20 @@ class ClientConfig:
 
 
 def load_config() -> ClientConfig:
+    # Try current directory first
     config = dotenv.dotenv_values()
+    
+    # If not found, try parent directory
+    if not config:
+        parent_env = Path("../.env")
+        if parent_env.exists():
+            config = dotenv.dotenv_values(parent_env)
+    
+    # If still not found, try parent's parent directory
+    if not config:
+        parent_parent_env = Path("../../.env")
+        if parent_parent_env.exists():
+            config = dotenv.dotenv_values(parent_parent_env)
 
     api_url = config.get("MARTIAN_API_URL")
     api_key = config.get("MARTIAN_API_KEY")
