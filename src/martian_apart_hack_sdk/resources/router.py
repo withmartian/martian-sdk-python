@@ -15,9 +15,10 @@ class Router:
     and are used as parameters for operations like running the router or creating training jobs.
 
     Router Lifecycle:
-    1. When first created, a router only routes to its base_model.
-    2. To enable routing between multiple models, the router must be trained using run_training_job.
-    3. After training, the router can intelligently route between any of the models it was trained on,
+
+    #. When first created, a router only routes to its base_model.
+    #. To enable routing between multiple models, the router must be trained using run_training_job.
+    #. After training, the router can intelligently route between any of the models it was trained on,
        based on quality vs latency preferences specified in routing constraints.
 
     Routers should not be created from this class. Instead, use the `RouterClient` to create and manage routers.

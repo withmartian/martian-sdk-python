@@ -7,6 +7,18 @@ For more detailed documentation and actual code examples, see:
 * the quickstart notebook in the SDK directory (`martian-sdk-python/quickstart_guide.ipynb`)
 * the :doc:`api/index` page for detailed documentation of all SDK features
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   installation
+   api/martian_client
+   api/judge_specs
+   api/judges_client
+   api/judge
+   api/routers_client
+   api/router
+   api/routing_constraints
 
 The Martian Client
 -----------------
@@ -48,9 +60,10 @@ When a router is first created,
 before training, it sends requests to a single model.
 
 To train a router, you need to provide it with:
-- a judge
-- a set of requests
-- a list of models
+
+* a judge
+* a set of requests
+* a list of models
 
 The Martian platform will send your requests to each model,
 and the judge will evaluate the quality of the responses.
