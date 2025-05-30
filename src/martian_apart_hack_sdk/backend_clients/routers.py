@@ -60,11 +60,15 @@ class RoutersClient:
 
         Args:
             router_id (str): An arbitrary identifier (chosen by you) for the router. You'll need to use this identifier to reference the router in other API calls.
-            base_model (str): The base model to use for the router.
+            base_model (str): The initial model the router will use. The router will only route to this model until it is trained with additional models using run_training_job.
             description (Optional[str], optional): The description of the router, for your own reference.
 
         Returns:
             router_resource.Router: The newly created router resource.
+
+        Notes:
+            When first created, a router only routes to its base_model. To enable routing between multiple models,
+            you must train the router using run_training_job with a list of models to include.
 
         Raises:
             ResourceAlreadyExistsError: If a router with the given ID already exists.
@@ -229,12 +233,16 @@ class RoutersClient:
         llms: List[str],
         requests: List[Dict[str, Any]],
     ) -> RouterTrainingJob:
-        """Train a router for a given set of models, using a judge and list of completion requests.
+        """Train a router to intelligently route between multiple models.
+
+        After training, the router will be able to route between any of the models specified in the llms parameter,
+        based on the quality vs latency preferences specified in routing constraints.
 
         Args:
             router (Router): The router to train.
             judge (Judge): The judge to use for evaluation.
-            llms (List[str]): List of LLM model names to use.
+            llms (List[str]): List of model names to include in routing decisions. After training, the router will only be able to route between these models.
+                You can use predefined model sets from martian_apart_hack_sdk.models.llm_models (e.g., ANTHROPIC_MODELS, OPENAI_MODELS, ALL_MODELS).
             requests (List[Dict[str, Any]]): List of request objects containing messages for training.
             
         Returns:
@@ -249,8 +257,10 @@ class RoutersClient:
             httpx.TimeoutException: If the request times out.
 
         Examples:
-            Create a simple judge and router, then train the router using example requests:
+            Create a judge and router, then train the router with multiple models:
             
+            >>> from martian_apart_hack_sdk.models.llm_models import ANTHROPIC_MODELS, OPENAI_MODELS
+            >>> 
             >>> # Create a basic judge that evaluates response quality
             >>> judge_spec = RubricJudgeSpec(
             ...     model_type="rubric_judge",
@@ -261,8 +271,11 @@ class RoutersClient:
             ... )
             >>> judge = client.judges.create("quality_judge", judge_spec)
             >>> 
-            >>> # Create a simple router
-            >>> router = client.routers.create("test_router", RouterSpec(...))
+            >>> # Create a router (initially only routes to base_model)
+            >>> router = client.routers.create(
+            ...     router_id="test_router",
+            ...     base_model="anthropic/anthropic/claude-3-opus-latest"
+            ... )
             >>> 
             >>> # Example training requests
             >>> requests = [
@@ -279,11 +292,11 @@ class RoutersClient:
             ...     }
             ... ]
             >>> 
-            >>> # Train the router
+            >>> # Train the router with multiple models
             >>> training_job = client.routers.run_training_job(
             ...     router=router,
             ...     judge=judge,
-            ...     llms=["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o"],
+            ...     llms=list(ANTHROPIC_MODELS | OPENAI_MODELS),  # Train on all Anthropic and OpenAI models
             ...     requests=requests
             ... )
         """

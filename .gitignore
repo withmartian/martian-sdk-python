@@ -172,3 +172,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# docs output
+docs/build/
+
+# mac stuff
+.DS_Store

@@ -24,17 +24,14 @@ class RubricJudgeSpec:
         extract_judgement (Optional[Dict[str, Any]]): Optional configuration for extracting the final judgment details.
 
     Notes:
-        The default prescript is:
-            
-            ```
+        The default prescript is::
+
             You are a helpful assistant that scores responses between ${min_score} and ${max_score} according to the following rubric:
-            ```
 
-            `${min_score}` and `${max_score}` are replaced with the `min_score` and `max_score` args.
+        The ``${min_score}`` and ``${max_score}`` are replaced with the ``min_score`` and ``max_score`` args.
 
-        The default postscript is:
+        The default postscript is::
 
-            ```
             Here's the conversation you are judging:
             <content>
             ${content}
@@ -47,14 +44,13 @@ class RubricJudgeSpec:
             Your response MUST include:
             1. A <rationale>...</rationale> tag containing your explanation
             2. A <score>...</score> tag containing your numerical score
-            ```
 
-            `${content}` is replaced with the content of the conversation you are judging.
+        The ``${content}`` is replaced with the content of the conversation you are judging.
 
-            `${min_score}` and `${max_score}` are replaced with the `min_score` and `max_score` args.
+        The ``${min_score}`` and ``${max_score}`` are replaced with the ``min_score`` and ``max_score`` args.
 
+        The full judging prompt looks like::
 
-        The full judging prompt looks like:
             {filled_prescript}
 
             <rubric>
@@ -64,11 +60,9 @@ class RubricJudgeSpec:
             {filled_postscript}
 
     Warning:
-        If you override the default prescript or postscript, you must include the `${min_score}`, `${max_score}`, and `${content}` tags in the prompt,
+        If you override the default prescript or postscript, you must include the ``${min_score}``, ``${max_score}``, and ``${content}`` tags in the prompt,
         and instruct the judge to include the <rationale> and <score> tags in the response.
         We do not recommend overriding the default prescript or postscript.
-
-
 
     Examples:
         >>> rubric = '''
