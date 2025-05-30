@@ -2,9 +2,11 @@
 
 import dataclasses
 import json
-from typing import Dict, Any
+import pathlib
+from typing import Any, Dict
 
 import dotenv
+
 
 @dataclasses.dataclass(frozen=True)
 class ClientConfig:
@@ -16,17 +18,28 @@ class ClientConfig:
     @property
     def openai_api_url(self) -> str:
         """Get the OpenAI API URL.
-        
+
         Returns:
             str: The OpenAI API URL constructed from the base API URL
         """
         return f"{self.api_url}/openai/v2"
 
-    
-
 
 def load_config() -> ClientConfig:
+    # Try current directory first
     config = dotenv.dotenv_values()
+
+    # If not found, try parent directory
+    if not config:
+        parent_env = pathlib.Path("../.env")
+        if parent_env.exists():
+            config = dotenv.dotenv_values(parent_env)
+
+    # If still not found, try parent's parent directory
+    if not config:
+        parent_parent_env = pathlib.Path("../../.env")
+        if parent_parent_env.exists():
+            config = dotenv.dotenv_values(parent_parent_env)
 
     api_url = config.get("MARTIAN_API_URL")
     api_key = config.get("MARTIAN_API_KEY")
