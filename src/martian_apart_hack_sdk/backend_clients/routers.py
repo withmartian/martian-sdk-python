@@ -1,23 +1,27 @@
 """Router API client functions."""
 
-from typing import Any, Dict, Optional, List
-
 import dataclasses
-import time
 import logging
-import openai
-import httpx
+import time
 from datetime import datetime, timedelta
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
-from martian_apart_hack_sdk import utils
-from martian_apart_hack_sdk.resources import router as router_resource
-from martian_apart_hack_sdk.models.RouterConstraints import RoutingConstraint, render_extra_body_router_constraint
-from martian_apart_hack_sdk.resources.judge import Judge
-from martian_apart_hack_sdk.resources.router import Router
-from martian_apart_hack_sdk.models.RouterTrainingJob import RouterTrainingJob
+from typing import Any, Dict, List, Optional
+
+import httpx
+import openai
 from openai.resources.chat.completions import completions
 
-logger = logging.getLogger(__name__)
+from martian_apart_hack_sdk import exceptions, utils
+from martian_apart_hack_sdk.models.RouterConstraints import (
+    RoutingConstraint,
+    render_extra_body_router_constraint,
+)
+from martian_apart_hack_sdk.models.RouterTrainingJob import RouterTrainingJob
+from martian_apart_hack_sdk.resources import router as router_resource
+from martian_apart_hack_sdk.resources.judge import Judge
+from martian_apart_hack_sdk.resources.router import Router
+
+_LOGGER = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass(frozen=True)
 class RoutersClient:
@@ -51,10 +55,10 @@ class RoutersClient:
         return {"routerSpec": router_spec}
 
     def create_router(
-            self,
-            router_id: str,
-            base_model: str,
-            description: Optional[str] = None,
+        self,
+        router_id: str,
+        base_model: str,
+        description: Optional[str] = None,
     ) -> router_resource.Router:
         """Create a router.
 
@@ -72,11 +76,13 @@ class RoutersClient:
             httpx.TimeoutException: If the request times out.
         """
         if self._is_router_exists(router_id):
-            raise ResourceAlreadyExistsError(f"Router with id {router_id} already exists")
+            raise exceptions.ResourceAlreadyExistsError(
+                f"Router with id {router_id} already exists"
+            )
         router_spec = {
-            'points': [
+            "points": [
                 self._get_model_executor(base_model, x=0.0, y=0.0),
-                self._get_model_executor(base_model, x=1.0, y=1.0)
+                self._get_model_executor(base_model, x=1.0, y=1.0),
             ]
         }
         payload = self._get_router_spec_payload(router_spec)
@@ -90,23 +96,17 @@ class RoutersClient:
     @staticmethod
     def _get_model_executor(base_model, x, y):
         return {
-            'point': {
-                'x': x,
-                'y': y
+            "point": {"x": x, "y": y},
+            "executor": {
+                "spec": {"executor_type": "ModelExecutor", "model_name": base_model}
             },
-            'executor': {
-                'spec': {
-                    'executor_type': 'ModelExecutor',
-                    'model_name': base_model
-                }
-            }
         }
 
     def update_router(
-            self,
-            router_id: str,
-            router_spec: Dict[str, Any],
-            description: Optional[str] = None,
+        self,
+        router_id: str,
+        router_spec: Dict[str, Any],
+        description: Optional[str] = None,
     ) -> router_resource.Router:
         """Update an existing router's specification and/or description.
 
@@ -129,7 +129,9 @@ class RoutersClient:
             httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router_id):
-            raise ResourceNotFoundError(f"Router with id {router_id} not found")
+            raise exceptions.ResourceNotFoundError(
+                f"Router with id {router_id} not found"
+            )
 
         payload = self._get_router_spec_payload(router_spec)
         if description is not None:
@@ -198,16 +200,16 @@ class RoutersClient:
             httpx.TimeoutException: If the request times out.
         """
         if not self._is_router_exists(router.id):
-            raise ResourceNotFoundError(f"Router with id {router.id} not found")
+            raise exceptions.ResourceNotFoundError(
+                f"Router with id {router.id} not found"
+            )
 
         openai_client = openai.OpenAI(
             api_key=self.config.api_key,
             base_url=self.config.openai_api_url,
         )
 
-        extra_body = {
-            **render_extra_body_router_constraint(routing_constraint)
-        }
+        extra_body = {**render_extra_body_router_constraint(routing_constraint)}
         if version is not None:
             version_to_use = version
         elif router.version is not None:
@@ -216,7 +218,8 @@ class RoutersClient:
             version_to_use = "latest"
 
         response = openai_client.chat.completions.create(
-            **completion_request | {"model": f"{router.name}/versions/{version_to_use}"},
+            **completion_request
+            | {"model": f"{router.name}/versions/{version_to_use}"},
             extra_body=extra_body,
             timeout=self.config.evaluation_timeout,
         )
@@ -287,19 +290,32 @@ class RoutersClient:
             ...     requests=requests
             ... )
         """
+        if llms is None or not llms:
+            raise exceptions.InvalidParameterError(
+                "At least one LLM model name must be provided"
+            )
+        if not isinstance(llms, list):
+            raise exceptions.InvalidParameterError(
+                "llms param must be a list of strings"
+            )
+        llm_models = list(set(llms))
+
         payload = {
             "routerName": router.name,
             "judgeName": judge.name,
-            "llms": llms,
-            "requests": requests
+            "llms": llm_models,
+            "requests": requests,
         }
 
         resp = self.httpx.post("/router_training_jobs", json=payload)
         resp.raise_for_status()
         job = RouterTrainingJob.from_dict(resp.json())
-        logger.info(
+        _LOGGER.info(
             "Started training job %s for router %s with judge %s and LLMs: %s",
-            job.name, router.name, judge.name, llms
+            job.name,
+            router.name,
+            judge.name,
+            llm_models,
         )
         return job
 
@@ -307,7 +323,7 @@ class RoutersClient:
         self,
         job_name: str,
         poll_interval: int = 10,
-        poll_timeout: int = 20 * 60  # 20 minutes in seconds
+        poll_timeout: int = 20 * 60,  # 20 minutes in seconds
     ) -> RouterTrainingJob:
         """Poll a training job until it completes or fails.
 
@@ -342,7 +358,7 @@ class RoutersClient:
             ...     print(f"Training failed with status: {final_job.status}")
         """
         # Extract job ID from full name if needed
-        job_id = job_name.split('/')[-1] if '/' in job_name else job_name
+        job_id = job_name.split("/")[-1] if "/" in job_name else job_name
 
         start_time = datetime.now()
         timeout_time = start_time + timedelta(seconds=poll_timeout)
@@ -350,18 +366,33 @@ class RoutersClient:
         while True:
             current_time = datetime.now()
             if current_time > timeout_time:
-                raise TimeoutError(f"Training job {job_id} did not complete within {poll_timeout} seconds")
+                raise TimeoutError(
+                    f"Training job {job_id} did not complete within {poll_timeout} seconds"
+                )
 
             job = self.poll_training_job(job_id)
 
             elapsed = current_time - start_time
-            logger.info("Training job %s status: %s (elapsed: %s)", job_id, job.status, elapsed)
+            _LOGGER.info(
+                "Training job %s status: %s (elapsed: %s)", job_id, job.status, elapsed
+            )
 
             if job.status == "FAILURE_WITHOUT_RETRY":
-                logger.info("Job failed. All attempts have been exhausted.")
+                _LOGGER.info("Job failed. All attempts have been exhausted.")
+                if job.error_message:
+                    _LOGGER.error("Error message: %s", job.error_message)
+                _LOGGER.info("Retry count: %d", job.retry_count)
+
+            if job.status == "FAILURE":
+                _LOGGER.info("Job failed.")
+                if job.error_message:
+                    _LOGGER.error("Error message: %s", job.error_message)
+                _LOGGER.info("Retry count: %d", job.retry_count)
 
             if job.status in ["SUCCESS", "FAILURE_WITHOUT_RETRY", "FAILURE"]:
-                logger.info("Training job %s completed with status: %s", job_id, job.status)
+                _LOGGER.info(
+                    "Training job %s completed with status: %s", job_id, job.status
+                )
                 return job
 
             time.sleep(poll_interval)
@@ -386,8 +417,7 @@ class RoutersClient:
             httpx.HTTPError: If the request fails.
             httpx.TimeoutException: If the request times out.
         """
-        job_id = job_name.split('/')[-1] if '/' in job_name else job_name
+        job_id = job_name.split("/")[-1] if "/" in job_name else job_name
         resp = self.httpx.get(f"/router_training_jobs/{job_id}")
         resp.raise_for_status()
         return RouterTrainingJob.from_dict(resp.json())
-
