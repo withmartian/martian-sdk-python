@@ -2,7 +2,7 @@
 
 import dataclasses
 import datetime as dt
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 @dataclasses.dataclass(frozen=True)
@@ -17,6 +17,8 @@ class RouterTrainingJob:
     create_time: dt.datetime
     update_time: dt.datetime
     llms: List[str]
+    error_message: Optional[str]
+    retry_count: int
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "RouterTrainingJob":
@@ -37,4 +39,6 @@ class RouterTrainingJob:
             create_time=data["createTime"],
             update_time=data["updateTime"],
             llms=data["llms"],
+            error_message=data.get("errorMessage"),
+            retry_count=data.get("retryCount", 0),
         )

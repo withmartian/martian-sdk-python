@@ -11,16 +11,11 @@ import openai
 from openai.types.chat import chat_completion
 
 from martian_apart_hack_sdk import exceptions, utils
-from martian_apart_hack_sdk.models.router_constraints import (
-    RoutingConstraint,
-    render_extra_body_router_constraint,
-)
-from martian_apart_hack_sdk.models.router_training_job import RouterTrainingJob
+from martian_apart_hack_sdk.models import router_constraints, router_training_job
+from martian_apart_hack_sdk.resources import judge as judge_resource
 from martian_apart_hack_sdk.resources import router as router_resource
-from martian_apart_hack_sdk.resources.judge import Judge
-from martian_apart_hack_sdk.resources.router import Router
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -155,7 +150,7 @@ class RoutersClient:
         resp.raise_for_status()
         return [self._init_router(j) for j in resp.json()["routers"]]
 
-    def get(self, router_id: str, version=None) -> Router:
+    def get(self, router_id: str, version=None) -> router_resource.Router:
         """Get a specific router by ID and optionally version.
 
         Args:
@@ -183,8 +178,8 @@ class RoutersClient:
 
     def run(
         self,
-        router: Router,
-        routing_constraint: RoutingConstraint,
+        router: router_resource.Router,
+        routing_constraint: router_constraints.RoutingConstraint,
         completion_request: Dict[str, Any],
         version: Optional[int] = None,
     ) -> chat_completion.ChatCompletion:
@@ -214,7 +209,9 @@ class RoutersClient:
             base_url=self.config.openai_api_url,
         )
 
-        extra_body = {**render_extra_body_router_constraint(routing_constraint)}
+        extra_body = {
+            **router_constraints.render_extra_body_router_constraint(routing_constraint)
+        }
         if version is not None:
             version_to_use = version
         elif router.version is not None:
@@ -232,11 +229,11 @@ class RoutersClient:
 
     def run_training_job(
         self,
-        router: Router,
-        judge: Judge,
+        router: router_resource.Router,
+        judge: judge_resource.Judge,
         llms: List[str],
         requests: List[Dict[str, Any]],
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Train a router for a given set of models, using a judge and list of completion requests.
 
         Args:
@@ -295,22 +292,32 @@ class RoutersClient:
             ...     requests=requests
             ... )
         """
+        if llms is None or not llms:
+            raise exceptions.InvalidParameterError(
+                "At least one LLM model name must be provided"
+            )
+        if not isinstance(llms, list):
+            raise exceptions.InvalidParameterError(
+                "llms param must be a list of strings"
+            )
+        llm_models = list(set(llms))
+
         payload = {
             "routerName": router.name,
             "judgeName": judge.name,
-            "llms": llms,
+            "llms": llm_models,
             "requests": requests,
         }
 
         resp = self.httpx.post("/router_training_jobs", json=payload)
         resp.raise_for_status()
-        job = RouterTrainingJob.from_dict(resp.json())
-        logger.info(
+        job = router_training_job.RouterTrainingJob.from_dict(resp.json())
+        _LOGGER.info(
             "Started training job %s for router %s with judge %s and LLMs: %s",
             job.name,
             router.name,
             judge.name,
-            llms,
+            llm_models,
         )
         return job
 
@@ -319,7 +326,7 @@ class RoutersClient:
         job_name: str,
         poll_interval: int = 10,
         poll_timeout: int = 20 * 60,  # 20 minutes in seconds
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Poll a training job until it completes or fails.
 
         Args:
@@ -368,15 +375,24 @@ class RoutersClient:
             job = self.poll_training_job(job_id)
 
             elapsed = current_time - start_time
-            logger.info(
+            _LOGGER.info(
                 "Training job %s status: %s (elapsed: %s)", job_id, job.status, elapsed
             )
 
             if job.status == "FAILURE_WITHOUT_RETRY":
-                logger.info("Job failed. All attempts have been exhausted.")
+                _LOGGER.info("Job failed. All attempts have been exhausted.")
+                if job.error_message:
+                    _LOGGER.error("Error message: %s", job.error_message)
+                _LOGGER.info("Retry count: %d", job.retry_count)
+
+            if job.status == "FAILURE":
+                _LOGGER.info("Job failed.")
+                if job.error_message:
+                    _LOGGER.error("Error message: %s", job.error_message)
+                _LOGGER.info("Retry count: %d", job.retry_count)
 
             if job.status in ["SUCCESS", "FAILURE_WITHOUT_RETRY", "FAILURE"]:
-                logger.info(
+                _LOGGER.info(
                     "Training job %s completed with status: %s", job_id, job.status
                 )
                 return job
@@ -386,7 +402,7 @@ class RoutersClient:
     def poll_training_job(
         self,
         job_name: str,
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Get the current status of a training job.
 
         Args:
@@ -406,4 +422,4 @@ class RoutersClient:
         job_id = job_name.split("/")[-1] if "/" in job_name else job_name
         resp = self.httpx.get(f"/router_training_jobs/{job_id}")
         resp.raise_for_status()
-        return RouterTrainingJob.from_dict(resp.json())
+        return router_training_job.RouterTrainingJob.from_dict(resp.json())
