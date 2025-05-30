@@ -1,24 +1,19 @@
 """Router API client functions."""
 
 import dataclasses
+import datetime as dt
 import logging
 import time
-from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import httpx
 import openai
-from openai.resources.chat.completions import completions
+from openai.types.chat import chat_completion
 
 from martian_apart_hack_sdk import exceptions, utils
-from martian_apart_hack_sdk.models.RouterConstraints import (
-    RoutingConstraint,
-    render_extra_body_router_constraint,
-)
-from martian_apart_hack_sdk.models.RouterTrainingJob import RouterTrainingJob
+from martian_apart_hack_sdk.models import router_constraints, router_training_job
+from martian_apart_hack_sdk.resources import judge as judge_resource
 from martian_apart_hack_sdk.resources import router as router_resource
-from martian_apart_hack_sdk.resources.judge import Judge
-from martian_apart_hack_sdk.resources.router import Router
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -155,7 +150,7 @@ class RoutersClient:
         resp.raise_for_status()
         return [self._init_router(j) for j in resp.json()["routers"]]
 
-    def get(self, router_id: str, version=None) -> Optional[Router]:
+    def get(self, router_id: str, version=None) -> router_resource.Router:
         """Get a specific router by ID and optionally version.
 
         Args:
@@ -166,23 +161,28 @@ class RoutersClient:
             router_resource.Router: The router resource. OR None if the router does not exist.
 
         Raises:
+            ResourceNotFoundError: If the router doesn't exist.
             httpx.HTTPError: If the request fails for reasons other than a missing router.
             httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
+
         if resp.status_code == 404:
-            return None
+            raise exceptions.ResourceNotFoundError(
+                f"Router with id {router_id} not found"
+            )
+
         resp.raise_for_status()
         return self._init_router(resp.json())
 
     def run(
         self,
-        router: Router,
-        routing_constraint: RoutingConstraint,
+        router: router_resource.Router,
+        routing_constraint: router_constraints.RoutingConstraint,
         completion_request: Dict[str, Any],
         version: Optional[int] = None,
-    ) -> completions.ChatCompletion:
+    ) -> chat_completion.ChatCompletion:
         """Run a router with the given constraints and completion request.
 
         Args:
@@ -209,7 +209,9 @@ class RoutersClient:
             base_url=self.config.openai_api_url,
         )
 
-        extra_body = {**render_extra_body_router_constraint(routing_constraint)}
+        extra_body = {
+            **router_constraints.render_extra_body_router_constraint(routing_constraint)
+        }
         if version is not None:
             version_to_use = version
         elif router.version is not None:
@@ -227,11 +229,11 @@ class RoutersClient:
 
     def run_training_job(
         self,
-        router: Router,
-        judge: Judge,
+        router: router_resource.Router,
+        judge: judge_resource.Judge,
         llms: List[str],
         requests: List[Dict[str, Any]],
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Train a router for a given set of models, using a judge and list of completion requests.
 
         Args:
@@ -239,13 +241,13 @@ class RoutersClient:
             judge (Judge): The judge to use for evaluation.
             llms (List[str]): List of LLM model names to use.
             requests (List[Dict[str, Any]]): List of request objects containing messages for training.
-            
+
         Returns:
             RouterTrainingJob: The training job response metadata.
 
             Note: The response metadata contains information about the training job itself,
             but does not contain any information about the results of training or router configuration.
-            
+
         Raises:
             ResourceNotFoundError: If the router or judge doesn't exist.
             httpx.HTTPError: If the request fails.
@@ -253,7 +255,7 @@ class RoutersClient:
 
         Examples:
             Create a simple judge and router, then train the router using example requests:
-            
+
             >>> # Create a basic judge that evaluates response quality
             >>> judge_spec = RubricJudgeSpec(
             ...     model_type="rubric_judge",
@@ -263,10 +265,10 @@ class RoutersClient:
             ...     max_score=10
             ... )
             >>> judge = client.judges.create("quality_judge", judge_spec)
-            >>> 
+            >>>
             >>> # Create a simple router
             >>> router = client.routers.create("test_router", RouterSpec(...))
-            >>> 
+            >>>
             >>> # Example training requests
             >>> requests = [
             ...     {
@@ -281,7 +283,7 @@ class RoutersClient:
             ...         ]
             ...     }
             ... ]
-            >>> 
+            >>>
             >>> # Train the router
             >>> training_job = client.routers.run_training_job(
             ...     router=router,
@@ -309,7 +311,7 @@ class RoutersClient:
 
         resp = self.httpx.post("/router_training_jobs", json=payload)
         resp.raise_for_status()
-        job = RouterTrainingJob.from_dict(resp.json())
+        job = router_training_job.RouterTrainingJob.from_dict(resp.json())
         _LOGGER.info(
             "Started training job %s for router %s with judge %s and LLMs: %s",
             job.name,
@@ -324,7 +326,7 @@ class RoutersClient:
         job_name: str,
         poll_interval: int = 10,
         poll_timeout: int = 20 * 60,  # 20 minutes in seconds
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Poll a training job until it completes or fails.
 
         Args:
@@ -332,11 +334,11 @@ class RoutersClient:
                 (e.g. 'organizations/org-name/router_training_jobs/job-id') and the last part is used as ID.
             poll_interval (int, optional): Number of seconds to wait between polls. Defaults to 10.
             poll_timeout (int, optional): Maximum time to poll in seconds. Defaults to 1200 (20 minutes).
-            
+
         Returns:
             RouterTrainingJob: The final training job state. Check the `status` field to determine
                 if the job completed successfully ("SUCCESS") or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
-            
+
         Raises:
             httpx.HTTPError: If any API request fails.
             TimeoutError: If the job doesn't complete within the poll_timeout period.
@@ -344,14 +346,14 @@ class RoutersClient:
         Examples:
             >>> # Start a training job
             >>> training_job = client.routers.run_training_job(...)
-            >>> 
+            >>>
             >>> # Poll until completion
             >>> final_job = client.routers.poll_training_job(
             ...     job_name=training_job.name,
             ...     poll_interval=15,    # Check every 15 seconds
             ...     poll_timeout=600     # Wait up to 10 minutes
             ... )
-            >>> 
+            >>>
             >>> if final_job.status == "SUCCESS":
             ...     print("Training completed successfully!")
             ... else:
@@ -360,11 +362,11 @@ class RoutersClient:
         # Extract job ID from full name if needed
         job_id = job_name.split("/")[-1] if "/" in job_name else job_name
 
-        start_time = datetime.now()
-        timeout_time = start_time + timedelta(seconds=poll_timeout)
+        start_time = dt.datetime.now()
+        timeout_time = start_time + dt.timedelta(seconds=poll_timeout)
 
         while True:
-            current_time = datetime.now()
+            current_time = dt.datetime.now()
             if current_time > timeout_time:
                 raise TimeoutError(
                     f"Training job {job_id} did not complete within {poll_timeout} seconds"
@@ -400,7 +402,7 @@ class RoutersClient:
     def poll_training_job(
         self,
         job_name: str,
-    ) -> RouterTrainingJob:
+    ) -> router_training_job.RouterTrainingJob:
         """Get the current status of a training job.
 
         Args:
@@ -409,7 +411,7 @@ class RoutersClient:
 
         Returns:
             RouterTrainingJob: The current state of the training job. Check the `status` field to determine
-                if the job is still running ("RUNNING"), completed successfully ("SUCCESS"), 
+                if the job is still running ("RUNNING"), completed successfully ("SUCCESS"),
                 or failed ("FAILURE", "FAILURE_WITHOUT_RETRY").
 
         Raises:
@@ -420,4 +422,4 @@ class RoutersClient:
         job_id = job_name.split("/")[-1] if "/" in job_name else job_name
         resp = self.httpx.get(f"/router_training_jobs/{job_id}")
         resp.raise_for_status()
-        return RouterTrainingJob.from_dict(resp.json())
+        return router_training_job.RouterTrainingJob.from_dict(resp.json())

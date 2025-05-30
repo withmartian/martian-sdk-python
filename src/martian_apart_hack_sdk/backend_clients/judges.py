@@ -2,14 +2,13 @@
 
 import dataclasses
 import json
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
-from openai.types.chat import chat_completion, chat_completion_message_param
+from openai.types.chat import chat_completion
 
-from martian_apart_hack_sdk import judge_specs, utils
-from martian_apart_hack_sdk.exceptions import ResourceNotFoundError, ResourceAlreadyExistsError
-from martian_apart_hack_sdk.models.JudgeEvaluation import JudgeEvaluation
+from martian_apart_hack_sdk import exceptions, judge_specs, utils
+from martian_apart_hack_sdk.models.judge_evaluation import JudgeEvaluation
 from martian_apart_hack_sdk.resources import judge as judge_resource
 
 
@@ -23,6 +22,7 @@ class JudgesClient:
         httpx (httpx.Client): The HTTP client to use for the API.
         config (utils.ClientConfig): The configuration for the API.
     """
+
     httpx: httpx.Client
     config: utils.ClientConfig
 
@@ -46,11 +46,11 @@ class JudgesClient:
     def create_judge(
         self,
         judge_id: str,
-        judge_spec: Union[judge_specs.JudgeSpec,Dict[str, Any]],
+        judge_spec: Union[judge_specs.JudgeSpec, Dict[str, Any]],
         description: Optional[str] = None,
     ) -> judge_resource.Judge:
         """Create a judge.
-        
+
         Args:
             judge_id (str): An arbitrary identifier (chosen by you) for the judge. You'll need to use this identifier to reference the judge in other API calls.
             judge_spec (Union[judge_specs.JudgeSpec, Dict[str, Any]]): The specification for the judge.
@@ -66,7 +66,9 @@ class JudgesClient:
         """
 
         if self._is_judge_exists(judge_id):
-            raise ResourceAlreadyExistsError(f"Judge with id {judge_id} already exists")
+            raise exceptions.ResourceAlreadyExistsError(
+                f"Judge with id {judge_id} already exists"
+            )
         if not isinstance(judge_spec, dict):
             judge_spec = judge_spec.to_dict()
         payload = self._get_judge_spec_payload(judge_spec)
@@ -81,16 +83,16 @@ class JudgesClient:
         self, judge_id: str, judge_spec: judge_specs.JudgeSpec
     ) -> judge_resource.Judge:
         """Update a judge.
-        
+
         Args:
             judge_id (str): The ID of the judge to update.
             judge_spec (judge_specs.JudgeSpec): The new specification for the judge.
 
         Returns:
-            judge_resource.Judge: The new version of the judge. 
-            
-            Judge updates are non-destructive. The updated judge will have an incremented version number. 
-            You can use this version number to reference the judge in other API calls. 
+            judge_resource.Judge: The new version of the judge.
+
+            Judge updates are non-destructive. The updated judge will have an incremented version number.
+            You can use this version number to reference the judge in other API calls.
             You can also access previous versions of the judge by passing the previous version number to the `get` method.
 
         Raises:
@@ -106,7 +108,7 @@ class JudgesClient:
 
     def list(self) -> list[judge_resource.Judge]:
         """List all judges in your organization.
-        
+
         Returns:
             list[judge_resource.Judge]: A list of all judges.
 
@@ -118,9 +120,9 @@ class JudgesClient:
         resp.raise_for_status()
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
-    def get(self, judge_id: str, version=None) -> Optional[judge_resource.Judge]:
+    def get(self, judge_id: str, version=None) -> judge_resource.Judge:
         """Get a specific judge by ID and optionally version.
-        
+
         Args:
             judge_id (str): The ID of the judge to get.
             version (Optional[int], optional): The version of the judge to get. If not provided, the latest version will be returned.
@@ -129,22 +131,27 @@ class JudgesClient:
             judge_resource.Judge: The judge resource. OR None if the judge does not exist.
 
         Raises:
+            ResourceNotFoundError: If the judge with the given ID does not exist.
             httpx.HTTPError: If the request fails for reasons other than a missing judge.
             httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/judges/{judge_id}", params=params)
+
         if resp.status_code == 404:
-            return None
+            raise exceptions.ResourceNotFoundError(
+                f"Judge with id {judge_id} does not exist"
+            )
+
         resp.raise_for_status()
         return self._init_judge(resp.json())
 
     def get_versions(self, judge_id: str) -> List[judge_resource.Judge]:
         """Get all versions of a specific judge.
-        
+
         Each time a judge is updated, a new version is created. This method returns all versions
         of a judge, ordered from newest to oldest.
-        
+
         Args:
             judge_id (str): The ID of the judge to get versions for.
 
@@ -159,10 +166,14 @@ class JudgesClient:
         resp = self.httpx.get(f"/judges/{judge_id}/versions")
         resp.raise_for_status()
         if not resp.json()["judges"]:
-            raise ResourceNotFoundError(f"Judge with id {judge_id} does not exist")
+            raise exceptions.ResourceNotFoundError(
+                f"Judge with id {judge_id} does not exist"
+            )
         return [self._init_judge(j) for j in resp.json()["judges"]]
 
-    def render_prompt(self, judge: judge_resource.Judge,
+    def render_prompt(
+        self,
+        judge: judge_resource.Judge,
         completion_request: Dict[str, Any],
         completion_response: chat_completion.ChatCompletion,
     ) -> str:
@@ -170,11 +181,11 @@ class JudgesClient:
 
         Concatenates the judge's prescript, rubric, and postscript;
         evaluates variables in the prompt (e.g. `${min_score}`, `${max_score}`, `${content}`);
-        and returns the rendered prompt. 
-        
+        and returns the rendered prompt.
+
         This is useful for debugging or for getting a sense of what the judge will see,
         without having to run the judge or call the API.
-        
+
         Args:
             judge (judge_resource.Judge): The judge to render the prompt for.
             completion_request (Dict[str, Any]): The completion request parameters that would be sent to the LLM.
@@ -188,7 +199,9 @@ class JudgesClient:
             httpx.HTTPError: If the request fails.
             httpx.TimeoutException: If the request times out based on evaluation_timeout config.
         """
-        payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
+        payload = self._prepare_judge_evaluation_payload(
+            judge, completion_request, completion_response
+        )
         resp = self.httpx.post(
             f"/judges/{judge.id}:render",
             json=payload,
@@ -197,8 +210,9 @@ class JudgesClient:
         resp.raise_for_status()
         return json.loads(resp.json()["prompt"])["rubric_judge"]
 
-
-    def _prepare_judge_evaluation_payload(self, judge, completion_request, completion_response):
+    def _prepare_judge_evaluation_payload(
+        self, judge, completion_request, completion_response
+    ):
         request_payload = utils.get_evaluation_json_payload(completion_request)
         completion_payload = utils.get_evaluation_json_payload(
             # Cost and response fields are required by evaluate judge API
@@ -249,7 +263,9 @@ class JudgesClient:
             httpx.HTTPError: If the request fails.
             httpx.TimeoutException: If the request times out based on evaluation_timeout config.
         """
-        payload = self._prepare_judge_evaluation_payload(judge, completion_request, completion_response)
+        payload = self._prepare_judge_evaluation_payload(
+            judge, completion_request, completion_response
+        )
         resp = self.httpx.post(
             f"/judges/{judge.id}:evaluate",
             json=payload,

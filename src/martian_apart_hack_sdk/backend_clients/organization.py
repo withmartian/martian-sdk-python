@@ -5,7 +5,7 @@ import dataclasses
 import httpx
 
 from martian_apart_hack_sdk import utils
-from martian_apart_hack_sdk.models.OrganizationBalance import OrganizationBalance
+from martian_apart_hack_sdk.models import organization_balance
 
 
 @dataclasses.dataclass(frozen=True)
@@ -22,7 +22,7 @@ class OrganizationClient:
     httpx: httpx.Client
     config: utils.ClientConfig
 
-    def get_credit_balance(self) -> OrganizationBalance:
+    def get_credit_balance(self) -> organization_balance.OrganizationBalance:
         """Get the current credit balance for the organization.
 
         Returns:
@@ -32,8 +32,6 @@ class OrganizationClient:
             httpx.HTTPError: If the request fails.
             httpx.TimeoutException: If the request times out.
         """
-        resp = self.httpx.get(
-            '/credits'
-        )
+        resp = self.httpx.get("/credits")
         resp.raise_for_status()
-        return OrganizationBalance(**resp.json())
+        return organization_balance.OrganizationBalance(**resp.json())
