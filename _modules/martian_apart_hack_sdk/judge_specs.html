@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>martian_apart_hack_sdk.judge_specs &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">martian_apart_hack_sdk.judge_specs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for martian_apart_hack_sdk.judge_specs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Specifications for judges.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+
+<div class="viewcode-block" id="RubricJudgeSpec">
+<a class="viewcode-back" href="../../api/judge_specs.html#martian_apart_hack_sdk.judge_specs.RubricJudgeSpec">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RubricJudgeSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A specification for a rubric-based judge that evaluates submissions against defined criteria.</span>
+
+<span class="sd">    This class defines the configuration for a judge that uses a rubric and a language model</span>
+<span class="sd">    to evaluate submissions. The judge applies the rubric using the specified model to generate</span>
+<span class="sd">    a numerical score within the defined range.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_type (Literal[&quot;rubric_judge&quot;]): The type of judge, must be &quot;rubric_judge&quot;.</span>
+<span class="sd">        rubric (str): The evaluation criteria or rubric text that the judge will use to assess submissions.</span>
+<span class="sd">        model (str): The identifier of the language model to be used for evaluation.</span>
+<span class="sd">        min_score (float): The minimum possible score that can be assigned.</span>
+<span class="sd">        max_score (float): The maximum possible score that can be assigned.</span>
+<span class="sd">        prescript (Optional[str]): Optional instructions or context to be provided before the evaluation. This is included in the prompt that is sent to the judge, before the rubric.</span>
+<span class="sd">        postscript (Optional[str]): Optional instructions or processing steps to be applied after the evaluation. This is included in the prompt that is sent to the judge, after the rubric.</span>
+<span class="sd">        extract_variables (Optional[Dict[str, Any]]): Optional configuration for extracting variables from the evaluation.</span>
+<span class="sd">        extract_judgement (Optional[Dict[str, Any]]): Optional configuration for extracting the final judgment details.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The default prescript is::</span>
+
+<span class="sd">            You are a helpful assistant that scores responses between ${min_score} and ${max_score} according to the following rubric:</span>
+
+<span class="sd">        The ``${min_score}`` and ``${max_score}`` are replaced with the ``min_score`` and ``max_score`` args.</span>
+
+<span class="sd">        The default postscript is::</span>
+
+<span class="sd">            Here&#39;s the conversation you are judging:</span>
+<span class="sd">            &lt;content&gt;</span>
+<span class="sd">            ${content}</span>
+<span class="sd">            &lt;/content&gt;</span>
+
+<span class="sd">            Please evaluate the assistant&#39;s response in the conversation above according to the rubric.</span>
+<span class="sd">            Think step-by-step to produce a score, and please provide a rationale for your score.</span>
+<span class="sd">            Your score should be between ${min_score} and ${max_score}.</span>
+
+<span class="sd">            Your response MUST include:</span>
+<span class="sd">            1. A &lt;rationale&gt;...&lt;/rationale&gt; tag containing your explanation</span>
+<span class="sd">            2. A &lt;score&gt;...&lt;/score&gt; tag containing your numerical score</span>
+
+<span class="sd">        The ``${content}`` is replaced with the content of the conversation you are judging.</span>
+
+<span class="sd">        The ``${min_score}`` and ``${max_score}`` are replaced with the ``min_score`` and ``max_score`` args.</span>
+
+<span class="sd">        The full judging prompt looks like::</span>
+
+<span class="sd">            {filled_prescript}</span>
+
+<span class="sd">            &lt;rubric&gt;</span>
+<span class="sd">            {filled_rubric}</span>
+<span class="sd">            &lt;/rubric&gt;</span>
+
+<span class="sd">            {filled_postscript}</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        If you override the default prescript or postscript, you must include the ``${min_score}``, ``${max_score}``, and ``${content}`` tags in the prompt,</span>
+<span class="sd">        and instruct the judge to include the &lt;rationale&gt; and &lt;score&gt; tags in the response.</span>
+<span class="sd">        We do not recommend overriding the default prescript or postscript.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; rubric = &#39;&#39;&#39;</span>
+<span class="sd">        ... You are tasked with evaluating whether a restaurant recommendation is good.</span>
+<span class="sd">        ... The scoring is as follows:</span>
+<span class="sd">        ... - 1: If the recommendation doesn&#39;t meet any of the criteria.</span>
+<span class="sd">        ... - 2: If the recommendation meets only some small part of the criteria.</span>
+<span class="sd">        ... - 3: If the recommendation is reasonable, but not perfect.</span>
+<span class="sd">        ... - 4: If the recommendation is almost perfect.</span>
+<span class="sd">        ... - 5: If the recommendation is perfect.</span>
+<span class="sd">        ... &#39;&#39;&#39;</span>
+<span class="sd">        &gt;&gt;&gt; rubric_judge_spec = RubricJudgeSpec(</span>
+<span class="sd">        ...     model_type=&quot;rubric_judge&quot;,</span>
+<span class="sd">        ...     rubric=rubric,</span>
+<span class="sd">        ...     model=&quot;openai/openai/gpt-4o&quot;,</span>
+<span class="sd">        ...     min_score=1,</span>
+<span class="sd">        ...     max_score=5,</span>
+<span class="sd">        ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rubric_judge&quot;</span><span class="p">]</span>
+    <span class="n">rubric</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">min_score</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">max_score</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">prescript</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">postscript</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extract_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extract_judgement</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the judge specification to a dictionary format suitable for API requests.</span>
+
+<span class="sd">        This method serializes the specification, removing any None values to ensure</span>
+<span class="sd">        only meaningful configuration is sent to the API.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: A dictionary containing all non-None attributes of this</span>
+<span class="sd">                specification, ready to be sent to the API.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Filter out None values.</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+
+
+<span class="c1"># For backward compatibility and future extensibility, JudgeSpec is an alias for RubricJudgeSpec.</span>
+<span class="c1"># If we add other types of judges in the future, this will become a Union type.</span>
+<span class="n">JudgeSpec</span> <span class="o">=</span> <span class="n">RubricJudgeSpec</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

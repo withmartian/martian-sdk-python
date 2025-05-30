@@ -1,0 +1,206 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>martian_apart_hack_sdk.resources.judge &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">martian_apart_hack_sdk.resources.judge</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for martian_apart_hack_sdk.resources.judge</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Resource models for Martian judges.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai.types.chat</span><span class="w"> </span><span class="kn">import</span> <span class="n">chat_completion</span><span class="p">,</span> <span class="n">chat_completion_message_param</span>
+
+
+<div class="viewcode-block" id="Judge">
+<a class="viewcode-back" href="../../../api/judge.html#martian_apart_hack_sdk.resources.judge.Judge">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Judge</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Judge resource representing a Martian judge configuration.</span>
+
+<span class="sd">    This class serves as the primary interface for judge operations in the SDK.</span>
+<span class="sd">    Judge instances are returned by JudgeClient methods (`create_judge`, `get`, `list`)</span>
+<span class="sd">    and are used as parameters for operations like evaluating completions or training routers.</span>
+
+<span class="sd">    Judges should not be created from this class. Instead, use the `JudgeClient` to create and manage judges.</span>
+
+<span class="sd">    The Judge is immutable. You can not update it directly from instances of this class.</span>
+<span class="sd">    Instead, use the `JudgeClient` to update the judge.</span>
+<span class="sd">    Any updates create a new version of the judge with an incremented version number.</span>
+<span class="sd">    Previous versions remain accessible through the `JudgeClient.get()` method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        id (str): The judge&#39;s identifier.</span>
+<span class="sd">        version (int): The judge version number. Increments with each update.</span>
+<span class="sd">        description (str): A human-readable description of the judge&#39;s purpose.</span>
+<span class="sd">        createTime (str): When the judge was created (RFC 3339 format).</span>
+<span class="sd">        name (str): The judge&#39;s full resource name (format: &quot;organizations/{org}/judges/{judge_id}&quot;).</span>
+<span class="sd">        judgeSpec (Dict[str, Any]): The judge&#39;s configuration, including rubric and evaluation settings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">createTime</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">judgeSpec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Judge.__post_init__">
+<a class="viewcode-back" href="../../../api/judge.html#martian_apart_hack_sdk.resources.judge.Judge.__post_init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the judge ID from the full resource name and set the `id` field.</span>
+<span class="sd">        </span>
+<span class="sd">        The ID is taken from the last segment of the name path. For example, from</span>
+<span class="sd">        &quot;organizations/org-123/judges/my-judge&quot;, the ID would be &quot;my-judge&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set id as the last segment after the last &quot;/&quot;</span>
+        <span class="n">_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">_id</span><span class="p">)</span></div>
+</div>
+
+
+    <span class="c1"># def refresh(self) -&gt; Judge:</span>
+    <span class="c1">#     &quot;&quot;&quot;Pull the latest server state and mutate in-place.&quot;&quot;&quot;</span>
+    <span class="c1">#     return self._backend.judges.get(self.id)</span>
+
+    <span class="c1"># def to_dict(self) -&gt; Dict[str, Any]:</span>
+    <span class="c1">#     return {k: v for k, v in self.__dict__.items() if not k.startswith(&quot;_&quot;)}</span>
+
+    <span class="c1"># # ---------- Evaluate -------------------------------------</span>
+
+    <span class="c1"># # TODO: Return type.</span>
+    <span class="c1"># def evaluate(</span>
+    <span class="c1">#     self,</span>
+    <span class="c1">#     completion_request: chat_completion_message_param.ChatCompletionMessageParam,</span>
+    <span class="c1">#     completion: chat_completion.ChatCompletion,</span>
+    <span class="c1"># ) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Remote call:</span>
+    <span class="c1">#     POST /judges/{id}/evaluate  →  {overall: float, by_rubric: {...}}</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     # TODO: Work out in which cases we want to evaluate a versioned judge,</span>
+    <span class="c1">#     # and when we want to evaluate the judge spec only.</span>
+    <span class="c1">#     return self._backend.judges.evaluate_judge(</span>
+    <span class="c1">#         judge_id=self.id,</span>
+    <span class="c1">#         judge_version=self.version,</span>
+    <span class="c1">#         completion_request=completion_request,</span>
+    <span class="c1">#         completion=completion,</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1"># def passes(self, prompt: str, output: str, *, threshold: float = 0.8) -&gt; bool:</span>
+    <span class="c1">#     return self.evaluate(prompt, output)[&quot;overall&quot;] &gt;= threshold</span>
+
+    <span class="c1"># # ---------- CRUD shortcuts -------------------------------</span>
+
+    <span class="c1"># def update(self, **fields) -&gt; &quot;Judge&quot;:</span>
+    <span class="c1">#     &quot;&quot;&quot;PATCH the Judge on the server, then return new version&quot;&quot;&quot;</span>
+    <span class="c1">#     data = self._backend.judges.update(self.id, **fields).to_dict()</span>
+    <span class="c1">#     self.__dict__.update(data)</span>
+    <span class="c1">#     return self</span>
+
+    <span class="c1"># def delete(self) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;DELETE /judges/{id}&quot;&quot;&quot;</span>
+    <span class="c1">#     self._backend.judges.delete(self.id)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

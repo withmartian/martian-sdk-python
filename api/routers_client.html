@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoutersClient &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Router" href="router.html" />
+    <link rel="prev" title="Judge" href="judge.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RoutersClient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#router-lifecycle">Router Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-router">Creating a Router</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-a-router">Training a Router</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-model-sets">Available Model Sets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient"><code class="docutils literal notranslate"><span class="pre">RoutersClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.create_router"><code class="docutils literal notranslate"><span class="pre">RoutersClient.create_router()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.update_router"><code class="docutils literal notranslate"><span class="pre">RoutersClient.update_router()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.list"><code class="docutils literal notranslate"><span class="pre">RoutersClient.list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.get"><code class="docutils literal notranslate"><span class="pre">RoutersClient.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run"><code class="docutils literal notranslate"><span class="pre">RoutersClient.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run_training_job"><code class="docutils literal notranslate"><span class="pre">RoutersClient.run_training_job()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.wait_training_job"><code class="docutils literal notranslate"><span class="pre">RoutersClient.wait_training_job()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.poll_training_job"><code class="docutils literal notranslate"><span class="pre">RoutersClient.poll_training_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RoutersClient</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/routers_client.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="routersclient">
+<h1>RoutersClient<a class="headerlink" href="#routersclient" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">RoutersClient</span></code> provides methods for creating, managing, and using routers. Routers are used to intelligently direct traffic between different LLM models based on your requirements.</p>
+<section id="router-lifecycle">
+<h2>Router Lifecycle<a class="headerlink" href="#router-lifecycle" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Initial Creation</strong>: When a router is first created with <code class="docutils literal notranslate"><span class="pre">create_router</span></code>, it only routes to a single model (specified by <code class="docutils literal notranslate"><span class="pre">base_model</span></code>).</p></li>
+<li><p><strong>Training</strong>: To enable routing between multiple models, use <code class="docutils literal notranslate"><span class="pre">run_training_job</span></code> to train the router with a set of models.</p></li>
+<li><p><strong>Routing</strong>: After training, the router can intelligently route between any of the models it was trained on.</p></li>
+</ol>
+</section>
+<section id="creating-a-router">
+<h2>Creating a Router<a class="headerlink" href="#creating-a-router" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">router</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">create_router</span><span class="p">(</span>
+    <span class="n">router_id</span><span class="o">=</span><span class="s2">&quot;my-router&quot;</span><span class="p">,</span>
+    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;anthropic/anthropic/claude-3-opus-latest&quot;</span><span class="p">,</span>  <span class="c1"># Initial model before training</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Routes between different models based on quality and cost&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="training-a-router">
+<h2>Training a Router<a class="headerlink" href="#training-a-router" title="Link to this heading"></a></h2>
+<p>To enable routing between multiple models, train the router using <code class="docutils literal notranslate"><span class="pre">run_training_job</span></code>. You can specify which models to include:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.models.llm_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ANTHROPIC_MODELS</span><span class="p">,</span> <span class="n">OPENAI_MODELS</span>
+
+<span class="c1"># Train on all Anthropic and OpenAI models</span>
+<span class="n">training_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">run_training_job</span><span class="p">(</span>
+    <span class="n">router</span><span class="o">=</span><span class="n">router</span><span class="p">,</span>
+    <span class="n">judge</span><span class="o">=</span><span class="n">quality_judge</span><span class="p">,</span>
+    <span class="n">llms</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">ANTHROPIC_MODELS</span> <span class="o">|</span> <span class="n">OPENAI_MODELS</span><span class="p">),</span>  <span class="c1"># Combine model sets using set operations</span>
+    <span class="n">requests</span><span class="o">=</span><span class="n">example_requests</span>
+<span class="p">)</span>
+
+<span class="c1"># Or train on specific models</span>
+<span class="n">training_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">run_training_job</span><span class="p">(</span>
+    <span class="n">router</span><span class="o">=</span><span class="n">router</span><span class="p">,</span>
+    <span class="n">judge</span><span class="o">=</span><span class="n">quality_judge</span><span class="p">,</span>
+    <span class="n">llms</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;anthropic/anthropic/claude-3-opus-latest&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;openai/openai/gpt-4o&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;together/mistralai/Mistral-Small-24B-Instruct-2501&quot;</span>
+    <span class="p">],</span>
+    <span class="n">requests</span><span class="o">=</span><span class="n">example_requests</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="available-model-sets">
+<h2>Available Model Sets<a class="headerlink" href="#available-model-sets" title="Link to this heading"></a></h2>
+<p>The SDK provides predefined sets of models in <code class="docutils literal notranslate"><span class="pre">martian_apart_hack_sdk.models.llm_models</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OPENAI_MODELS</span></code>: All OpenAI models (GPT-4 variants)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ANTHROPIC_MODELS</span></code>: All Anthropic models (Claude variants)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TOGETHER_MODELS</span></code>: All models available through Together</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GEMINI_MODELS</span></code>: All Google Gemini models</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ALL_MODELS</span></code>: Union of all available models</p></li>
+</ul>
+<p>You can use these sets to easily specify which models to include in router training:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.models.llm_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALL_MODELS</span>
+
+<span class="c1"># Train on every available model</span>
+<span class="n">training_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">run_training_job</span><span class="p">(</span>
+    <span class="n">router</span><span class="o">=</span><span class="n">router</span><span class="p">,</span>
+    <span class="n">judge</span><span class="o">=</span><span class="n">quality_judge</span><span class="p">,</span>
+    <span class="n">llms</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">ALL_MODELS</span><span class="p">),</span>  <span class="c1"># Convert set to list</span>
+    <span class="n">requests</span><span class="o">=</span><span class="n">example_requests</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">martian_apart_hack_sdk.backend_clients.routers.</span></span><span class="sig-name descname"><span class="pre">RoutersClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">httpx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient" title="Link to this definition"></a></dt>
+<dd><p>The client for the Martian Routers API. Use the RoutersClient to create, update, and list routers.</p>
+<p>Normally, you don’t need to create a RoutersClient directly. Instead, use the MartianClient.routers property to access the RoutersClient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>httpx</strong> (<em>httpx.Client</em>) – The HTTP client to use for the API.</p></li>
+<li><p><strong>config</strong> (<em>utils.ClientConfig</em>) – The configuration for the API.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.create_router">
+<span class="sig-name descname"><span class="pre">create_router</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">router_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.create_router"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.create_router" title="Link to this definition"></a></dt>
+<dd><p>Create a router.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>) – An arbitrary identifier (chosen by you) for the router. You’ll need to use this identifier to reference the router in other API calls.</p></li>
+<li><p><strong>base_model</strong> (<em>str</em>) – The initial model the router will use. The router will only route to this model until it is trained with additional models using run_training_job.</p></li>
+<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The description of the router, for your own reference.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly created router resource.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>router_resource.Router</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>When first created, a router only routes to its base_model. To enable routing between multiple models,
+you must train the router using run_training_job with a list of models to include.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ResourceAlreadyExistsError</strong> – If a router with the given ID already exists.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>base_model</strong> (<em>str</em>)</p></li>
+<li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="router.html#martian_apart_hack_sdk.resources.router.Router" title="martian_apart_hack_sdk.resources.router.Router"><em>Router</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.update_router">
+<span class="sig-name descname"><span class="pre">update_router</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">router_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">router_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.update_router"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.update_router" title="Link to this definition"></a></dt>
+<dd><p>Update an existing router’s specification and/or description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>) – The ID of the router to update.</p></li>
+<li><p><strong>router_spec</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The new router specification.</p></li>
+<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Optional new description for the router.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated Router resource.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>router_resource.Router</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Router updates are non-destructive. The updated router will have an incremented version number.
+You can use this version number to reference the router in other API calls.
+You can also access previous versions of the router by passing the previous version number to the <cite>get</cite> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the router doesn’t exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>)</p></li>
+<li><p><strong>router_spec</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p></li>
+<li><p><strong>description</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="router.html#martian_apart_hack_sdk.resources.router.Router" title="martian_apart_hack_sdk.resources.router.Router"><em>Router</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.list">
+<span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.list" title="Link to this definition"></a></dt>
+<dd><p>List all routers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of all available routers.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[router_resource.Router]</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">router_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.get" title="Link to this definition"></a></dt>
+<dd><p>Get a specific router by ID and optionally version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>) – The ID of the router to retrieve.</p></li>
+<li><p><strong>version</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The specific version of the router to retrieve. If not provided, the latest version will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The router resource. OR None if the router does not exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>router_resource.Router</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If the request fails for reasons other than a missing router.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">router</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routing_constraint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run" title="Link to this definition"></a></dt>
+<dd><p>Run a router with the given constraints and completion request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>router_id</strong> (<em>str</em>) – The ID of the router to run.</p></li>
+<li><p><strong>routing_constraint</strong> (<a class="reference internal" href="routing_constraints.html#martian_apart_hack_sdk.models.RouterConstraints.RoutingConstraint" title="martian_apart_hack_sdk.models.RouterConstraints.RoutingConstraint"><em>RoutingConstraint</em></a>) – The routing constraints to apply.</p></li>
+<li><p><strong>completion_request</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The completion request parameters.</p></li>
+<li><p><strong>version</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Optional router version to use.</p></li>
+<li><p><strong>router</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="router.html#martian_apart_hack_sdk.resources.router.Router" title="martian_apart_hack_sdk.resources.router.Router"><code class="xref py py-class docutils literal notranslate"><span class="pre">Router</span></code></a></span>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The router’s response string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the router doesn’t exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run_training_job">
+<span class="sig-name descname"><span class="pre">run_training_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">router</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">llms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.run_training_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run_training_job" title="Link to this definition"></a></dt>
+<dd><p>Train a router to intelligently route between multiple models.</p>
+<p>After training, the router will be able to route between any of the models specified in the llms parameter,
+based on the quality vs latency preferences specified in routing constraints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>router</strong> (<a class="reference internal" href="router.html#martian_apart_hack_sdk.resources.router.Router" title="martian_apart_hack_sdk.resources.router.Router"><em>Router</em></a>) – The router to train.</p></li>
+<li><p><strong>judge</strong> (<a class="reference internal" href="judge.html#martian_apart_hack_sdk.resources.judge.Judge" title="martian_apart_hack_sdk.resources.judge.Judge"><em>Judge</em></a>) – The judge to use for evaluation.</p></li>
+<li><p><strong>llms</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of model names to include in routing decisions. After training, the router will only be able to route between these models.
+You can use predefined model sets from martian_apart_hack_sdk.models.llm_models (e.g., ANTHROPIC_MODELS, OPENAI_MODELS, ALL_MODELS).</p></li>
+<li><p><strong>requests</strong> (<em>List</em><em>[</em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – List of request objects containing messages for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The training job response metadata.</p>
+<p>Note: The response metadata contains information about the training job itself,
+but does not contain any information about the results of training or router configuration.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>RouterTrainingJob</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the router or judge doesn’t exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Create a judge and router, then train the router with multiple models:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.models.llm_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ANTHROPIC_MODELS</span><span class="p">,</span> <span class="n">OPENAI_MODELS</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a basic judge that evaluates response quality</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">judge_spec</span> <span class="o">=</span> <span class="n">RubricJudgeSpec</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;rubric_judge&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">rubric</span><span class="o">=</span><span class="s2">&quot;Rate the response quality from 1-10 based on accuracy and completeness.&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">min_score</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">max_score</span><span class="o">=</span><span class="mi">10</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">judge</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;quality_judge&quot;</span><span class="p">,</span> <span class="n">judge_spec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a router (initially only routes to base_model)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">router_id</span><span class="o">=</span><span class="s2">&quot;test_router&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">base_model</span><span class="o">=</span><span class="s2">&quot;anthropic/anthropic/claude-3-opus-latest&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example training requests</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">requests</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>            <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;What is Python?&quot;</span><span class="p">}</span>
+<span class="gp">... </span>        <span class="p">]</span>
+<span class="gp">... </span>    <span class="p">},</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>            <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a machine learning expert who explains concepts clearly and concisely.&quot;</span><span class="p">},</span>
+<span class="gp">... </span>            <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Explain machine learning.&quot;</span><span class="p">}</span>
+<span class="gp">... </span>        <span class="p">]</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Train the router with multiple models</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">training_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">run_training_job</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">router</span><span class="o">=</span><span class="n">router</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">judge</span><span class="o">=</span><span class="n">judge</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">llms</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">ANTHROPIC_MODELS</span> <span class="o">|</span> <span class="n">OPENAI_MODELS</span><span class="p">),</span>  <span class="c1"># Train on all Anthropic and OpenAI models</span>
+<span class="gp">... </span>    <span class="n">requests</span><span class="o">=</span><span class="n">requests</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.wait_training_job">
+<span class="sig-name descname"><span class="pre">wait_training_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.wait_training_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.wait_training_job" title="Link to this definition"></a></dt>
+<dd><p>Poll a training job until it completes or fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>job_name</strong> (<em>str</em>) – The job name or ID. If it contains ‘/’ it’s treated as a full name
+(e.g. ‘organizations/org-name/router_training_jobs/job-id’) and the last part is used as ID.</p></li>
+<li><p><strong>poll_interval</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of seconds to wait between polls. Defaults to 10.</p></li>
+<li><p><strong>poll_timeout</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum time to poll in seconds. Defaults to 1200 (20 minutes).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The final training job state. Check the <cite>status</cite> field to determine</dt><dd><p>if the job completed successfully (“SUCCESS”) or failed (“FAILURE”, “FAILURE_WITHOUT_RETRY”).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>RouterTrainingJob</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If any API request fails.</p></li>
+<li><p><strong>TimeoutError</strong> – If the job doesn’t complete within the poll_timeout period.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Start a training job</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">training_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">run_training_job</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Poll until completion</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">final_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">routers</span><span class="o">.</span><span class="n">poll_training_job</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">job_name</span><span class="o">=</span><span class="n">training_job</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">poll_interval</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>    <span class="c1"># Check every 15 seconds</span>
+<span class="gp">... </span>    <span class="n">poll_timeout</span><span class="o">=</span><span class="mi">600</span>     <span class="c1"># Wait up to 10 minutes</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">final_job</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;SUCCESS&quot;</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training completed successfully!&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training failed with status: </span><span class="si">{</span><span class="n">final_job</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.routers.RoutersClient.poll_training_job">
+<span class="sig-name descname"><span class="pre">poll_training_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/routers.html#RoutersClient.poll_training_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.poll_training_job" title="Link to this definition"></a></dt>
+<dd><p>Get the current status of a training job.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job_name</strong> (<em>str</em>) – The job name or ID. If it contains ‘/’ it’s treated as a full name
+(e.g. ‘organizations/org-name/router_training_jobs/job-id’) and the last part is used as ID.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The current state of the training job. Check the <cite>status</cite> field to determine</dt><dd><p>if the job is still running (“RUNNING”), completed successfully (“SUCCESS”),
+or failed (“FAILURE”, “FAILURE_WITHOUT_RETRY”).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>RouterTrainingJob</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the training job doesn’t exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="judge.html" class="btn btn-neutral float-left" title="Judge" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="router.html" class="btn btn-neutral float-right" title="Router" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

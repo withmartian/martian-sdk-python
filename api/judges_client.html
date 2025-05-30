@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JudgesClient &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Judge" href="judge.html" />
+    <link rel="prev" title="Judge Specifications" href="judge_specs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">JudgesClient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient"><code class="docutils literal notranslate"><span class="pre">JudgesClient</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.create_judge"><code class="docutils literal notranslate"><span class="pre">JudgesClient.create_judge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.update_judge"><code class="docutils literal notranslate"><span class="pre">JudgesClient.update_judge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.list"><code class="docutils literal notranslate"><span class="pre">JudgesClient.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get"><code class="docutils literal notranslate"><span class="pre">JudgesClient.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get_versions"><code class="docutils literal notranslate"><span class="pre">JudgesClient.get_versions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.render_prompt"><code class="docutils literal notranslate"><span class="pre">JudgesClient.render_prompt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate"><code class="docutils literal notranslate"><span class="pre">JudgesClient.evaluate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate_using_judge_spec"><code class="docutils literal notranslate"><span class="pre">JudgesClient.evaluate_using_judge_spec()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">JudgesClient</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/judges_client.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="judgesclient">
+<h1>JudgesClient<a class="headerlink" href="#judgesclient" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">martian_apart_hack_sdk.backend_clients.judges.</span></span><span class="sig-name descname"><span class="pre">JudgesClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">httpx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient" title="Link to this definition"></a></dt>
+<dd><p>The client for the Martian Judges API. Use the JudgesClient to create, update, and list judges.</p>
+<p>Normally, you don’t need to create a JudgesClient directly. Instead, use the MartianClient.judges property to access the JudgesClient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>httpx</strong> (<em>httpx.Client</em>) – The HTTP client to use for the API.</p></li>
+<li><p><strong>config</strong> (<em>utils.ClientConfig</em>) – The configuration for the API.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.create_judge">
+<span class="sig-name descname"><span class="pre">create_judge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.create_judge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.create_judge" title="Link to this definition"></a></dt>
+<dd><p>Create a judge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge_id</strong> (<em>str</em>) – An arbitrary identifier (chosen by you) for the judge. You’ll need to use this identifier to reference the judge in other API calls.</p></li>
+<li><p><strong>judge_spec</strong> (<em>Union</em><em>[</em><em>judge_specs.JudgeSpec</em><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – The specification for the judge.</p></li>
+<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – The description of the judge, for your own reference.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly created judge resource.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>judge_resource.Judge</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceAlreadyExistsError</strong> – If a judge with the given ID already exists.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.update_judge">
+<span class="sig-name descname"><span class="pre">update_judge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge_spec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.update_judge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.update_judge" title="Link to this definition"></a></dt>
+<dd><p>Update a judge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge_id</strong> (<em>str</em>) – The ID of the judge to update.</p></li>
+<li><p><strong>judge_spec</strong> (<em>judge_specs.JudgeSpec</em>) – The new specification for the judge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>The new version of the judge.</p>
+<p>Judge updates are non-destructive. The updated judge will have an incremented version number.
+You can use this version number to reference the judge in other API calls.
+You can also access previous versions of the judge by passing the previous version number to the <cite>get</cite> method.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>judge_resource.Judge</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the judge with the given ID does not exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.list">
+<span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.list" title="Link to this definition"></a></dt>
+<dd><p>List all judges in your organization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of all judges.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[judge_resource.Judge]</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get" title="Link to this definition"></a></dt>
+<dd><p>Get a specific judge by ID and optionally version.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge_id</strong> (<em>str</em>) – The ID of the judge to get.</p></li>
+<li><p><strong>version</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The version of the judge to get. If not provided, the latest version will be returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The judge resource. OR None if the judge does not exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>judge_resource.Judge</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If the request fails for reasons other than a missing judge.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get_versions">
+<span class="sig-name descname"><span class="pre">get_versions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.get_versions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.get_versions" title="Link to this definition"></a></dt>
+<dd><p>Get all versions of a specific judge.</p>
+<p>Each time a judge is updated, a new version is created. This method returns all versions
+of a judge, ordered from newest to oldest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>judge_id</strong> (<em>str</em>) – The ID of the judge to get versions for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of all versions of the judge, ordered from newest to oldest.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[judge_resource.Judge]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the judge with the given ID does not exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.render_prompt">
+<span class="sig-name descname"><span class="pre">render_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.render_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.render_prompt" title="Link to this definition"></a></dt>
+<dd><p>Render the judging prompt for a judge.</p>
+<p>Concatenates the judge’s prescript, rubric, and postscript;
+evaluates variables in the prompt (e.g. <cite>${min_score}</cite>, <cite>${max_score}</cite>, <cite>${content}</cite>);
+and returns the rendered prompt.</p>
+<p>This is useful for debugging or for getting a sense of what the judge will see,
+without having to run the judge or call the API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge</strong> (<em>judge_resource.Judge</em>) – The judge to render the prompt for.</p></li>
+<li><p><strong>completion_request</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The completion request parameters that would be sent to the LLM.</p></li>
+<li><p><strong>completion_response</strong> (<em>chat_completion.ChatCompletion</em>) – The completion response from the LLM.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rendered prompt that would be sent to the Judge.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the judge with the given ID does not exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out based on evaluation_timeout config.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate" title="Link to this definition"></a></dt>
+<dd><p>Evaluate an LLM response using a specific judge.</p>
+<p>This method sends the completion request and response to the judge for evaluation.
+The judge will assess the response based on its rubric and return a structured evaluation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge</strong> (<em>judge_resource.Judge</em>) – The judge to use for evaluation.</p></li>
+<li><p><strong>completion_request</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The original completion request parameters that were sent to the LLM.</p></li>
+<li><p><strong>completion_response</strong> (<em>chat_completion.ChatCompletion</em>) – The completion response from the LLM to evaluate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The evaluation results, including:</dt><dd><ul class="simple">
+<li><p>score: The numerical score assigned by the judge</p></li>
+<li><p>reasoning: The judge’s explanation for the score</p></li>
+<li><p>metadata: Additional evaluation metadata</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JudgeEvaluation</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ResourceNotFoundError</strong> – If the judge with the given ID does not exist.</p></li>
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out based on evaluation_timeout config.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate_using_judge_spec">
+<span class="sig-name descname"><span class="pre">evaluate_using_judge_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/backend_clients/judges.html#JudgesClient.evaluate_using_judge_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.backend_clients.judges.JudgesClient.evaluate_using_judge_spec" title="Link to this definition"></a></dt>
+<dd><p>Evaluate an LLM response using a judge specification directly.</p>
+<p>Similar to evaluate(), but instead of using a saved judge, this method accepts a judge
+specification directly. This is useful for testing new judge specifications before
+creating a permanent judge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>judge_spec</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The judge specification to use for evaluation.</p></li>
+<li><p><strong>completion_request</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The original completion request parameters that were sent to the LLM.</p></li>
+<li><p><strong>completion_response</strong> (<em>chat_completion.ChatCompletion</em>) – The completion response from the LLM to evaluate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The evaluation results, including:</dt><dd><ul class="simple">
+<li><p>score: The numerical score assigned by the judge</p></li>
+<li><p>reasoning: The judge’s explanation for the score</p></li>
+<li><p>metadata: Additional evaluation metadata</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JudgeEvaluation</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>httpx.HTTPError</strong> – If the request fails.</p></li>
+<li><p><strong>httpx.TimeoutException</strong> – If the request times out based on evaluation_timeout config.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">MartianClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">judge_specs</span>
+
+<span class="c1"># Create a client instance</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">MartianClient</span><span class="p">(</span>
+    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;https://api.martian.com&quot;</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;your-api-key&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Create a new judge</span>
+<span class="n">judge_spec</span> <span class="o">=</span> <span class="n">judge_specs</span><span class="o">.</span><span class="n">RubricJudgeSpec</span><span class="p">(</span>
+    <span class="n">rubric</span><span class="o">=</span><span class="s2">&quot;Rate the response on a scale of 1-10&quot;</span><span class="p">,</span>
+    <span class="n">min_score</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_score</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+<span class="n">judge</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">create_judge</span><span class="p">(</span>
+    <span class="n">judge_id</span><span class="o">=</span><span class="s2">&quot;my-judge&quot;</span><span class="p">,</span>
+    <span class="n">judge_spec</span><span class="o">=</span><span class="n">judge_spec</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A judge that rates responses on a scale of 1-10&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># List all judges</span>
+<span class="n">all_judges</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+
+<span class="c1"># Get a specific judge</span>
+<span class="n">my_judge</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;my-judge&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get all versions of a judge</span>
+<span class="n">judge_versions</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">get_versions</span><span class="p">(</span><span class="s2">&quot;my-judge&quot;</span><span class="p">)</span>
+
+<span class="c1"># Update a judge</span>
+<span class="n">updated_spec</span> <span class="o">=</span> <span class="n">judge_specs</span><span class="o">.</span><span class="n">RubricJudgeSpec</span><span class="p">(</span>
+    <span class="n">rubric</span><span class="o">=</span><span class="s2">&quot;Rate the response on a scale of 1-5&quot;</span><span class="p">,</span>
+    <span class="n">min_score</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_score</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+<span class="n">updated_judge</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">update_judge</span><span class="p">(</span><span class="s2">&quot;my-judge&quot;</span><span class="p">,</span> <span class="n">updated_spec</span><span class="p">)</span>
+
+<span class="c1"># Evaluate an LLM response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai.types.chat</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatCompletion</span>
+<span class="n">completion_request</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Tell me a joke&quot;</span><span class="p">}]</span>
+<span class="p">}</span>
+<span class="n">completion_response</span> <span class="o">=</span> <span class="n">ChatCompletion</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
+    <span class="n">choices</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Why did the chicken cross the road?&quot;</span><span class="p">}}],</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span>
+<span class="p">)</span>
+<span class="n">evaluation</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">judges</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">judge</span><span class="p">,</span> <span class="n">completion_request</span><span class="p">,</span> <span class="n">completion_response</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="judge_specs.html" class="btn btn-neutral float-left" title="Judge Specifications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="judge.html" class="btn btn-neutral float-right" title="Judge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

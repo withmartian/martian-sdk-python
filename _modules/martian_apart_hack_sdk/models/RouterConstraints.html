@@ -1,0 +1,218 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>martian_apart_hack_sdk.models.RouterConstraints &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">martian_apart_hack_sdk.models.RouterConstraints</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for martian_apart_hack_sdk.models.RouterConstraints</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Router constraints models.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<div class="viewcode-block" id="ConstraintValue">
+<a class="viewcode-back" href="../../../api/routing_constraints.html#martian_apart_hack_sdk.models.RouterConstraints.ConstraintValue">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstraintValue</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Value for a constraint that can be either numeric or a model name.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        numeric_value (Optional[float], optional): A numeric value for the constraint.</span>
+<span class="sd">        model_name (Optional[str], optional): The model name for the constraint.</span>
+<span class="sd">    </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If both numeric_value and model_name are not set.</span>
+
+<span class="sd">    If the constraint value will be used as a cost constraint, the constraint value represents a maximum cost in USD.</span>
+<span class="sd">    If the constraint value will be used in a quality constraint, the constraint value represents a minimum quality score from 0 to 1.</span>
+
+<span class="sd">    Use a numeric_value to specify the constraint value explicitly.</span>
+<span class="sd">    Use a model_name to specify that the constraint mirrors the cost or quality of a specific model.</span>
+
+<span class="sd">    Note: You can not specify both numeric_value and model_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">numeric_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary format expected by the API.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numeric_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;numeric_value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">numeric_value</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">}</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either numeric_value or model_name must be set&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="CostConstraint">
+<a class="viewcode-back" href="../../../api/routing_constraints.html#martian_apart_hack_sdk.models.RouterConstraints.CostConstraint">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CostConstraint</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cost constraint for routing.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        value (ConstraintValue): The maximum cost in USD, specified as a either a direct numeric value or by referencing the cost of a specific model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">ConstraintValue</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary format expected by the API.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="QualityConstraint">
+<a class="viewcode-back" href="../../../api/routing_constraints.html#martian_apart_hack_sdk.models.RouterConstraints.QualityConstraint">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">QualityConstraint</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quality constraint for routing.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        value (ConstraintValue): The minimum quality score from 0 to 1, specified as a either a direct numeric value or by referencing the quality of a specific model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">ConstraintValue</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary format expected by the API.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="RoutingConstraint">
+<a class="viewcode-back" href="../../../api/routing_constraints.html#martian_apart_hack_sdk.models.RouterConstraints.RoutingConstraint">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RoutingConstraint</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Routing constraint that can be either a cost or quality constraint, but not both.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        cost_constraint (Optional[CostConstraint], optional): The cost constraint.</span>
+<span class="sd">        quality_constraint (Optional[QualityConstraint], optional): The quality constraint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cost_constraint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CostConstraint</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">quality_constraint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QualityConstraint</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary format expected by the API.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_constraint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;cost_constraint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_constraint</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality_constraint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">&quot;quality_constraint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality_constraint</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one constraint must be set&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">render_extra_body_router_constraint</span><span class="p">(</span><span class="n">routing_constraint</span><span class="p">:</span> <span class="n">RoutingConstraint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render extra body for router constraint.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        routing_constraint: RoutingConstraint instance to render</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary with routing_constraint field containing the constraint dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;routing_constraint&quot;</span><span class="p">:</span> <span class="n">routing_constraint</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

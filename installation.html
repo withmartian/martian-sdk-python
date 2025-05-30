@@ -1,0 +1,242 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MartianClient" href="api/martian_client.html" />
+    <link rel="prev" title="Martian Python SDK" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-setup">Project Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-by-step-setup">Step-by-Step Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-quickstart-notebook">Running the Quickstart Notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Before installing the Martian SDK, ensure you have:</p>
+<ul class="simple">
+<li><p>Python 3.9 or higher</p></li>
+<li><p>Git</p></li>
+<li><p><a class="reference external" href="https://docs.astral.sh/uv/">uv</a> - Fast Python package installer and resolver</p></li>
+</ul>
+</section>
+<section id="project-setup">
+<h2>Project Setup<a class="headerlink" href="#project-setup" title="Link to this heading"></a></h2>
+<p>We recommend setting up your project with the following structure:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>martian-hackathon/          # Root directory for all hackathon work
+├── .env                    # Environment variables
+├── .venv/                  # Virtual environment (will be created by uv, below)
+├── martian-sdk-python/     # Cloned SDK repository
+└── project/                # Your hackathon project directory
+</pre></div>
+</div>
+</section>
+<section id="step-by-step-setup">
+<h2>Step-by-Step Setup<a class="headerlink" href="#step-by-step-setup" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Create and enter the hackathon root directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>martian-hackathon
+<span class="nb">cd</span><span class="w"> </span>martian-hackathon
+</pre></div>
+</div>
+</li>
+<li><p>Clone the SDK repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/withmartian/martian-sdk-python.git
+</pre></div>
+</div>
+</li>
+<li><p>Create and activate a virtual environment in the hackathon root directory:</p>
+<p>On Linux/macOS:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</pre></div>
+</div>
+<p>On Windows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>venv
+.venv/Scripts/activate
+</pre></div>
+</div>
+</li>
+<li><p>Install the SDK in editable mode along with Jupyter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>martian-sdk-python
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>jupyter
+</pre></div>
+</div>
+</li>
+<li><p>Create your project directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>project
+</pre></div>
+</div>
+</li>
+<li><p>Create a <cite>.env</cite> file in the hackathon root directory with your Martian credentials:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat<span class="w"> </span>&gt;<span class="w"> </span>.env<span class="w"> </span><span class="s">&lt;&lt; EOL</span>
+<span class="s">MARTIAN_API_URL=https://withmartian.com/api</span>
+<span class="s">MARTIAN_API_KEY=your-api-key</span>
+<span class="s">EOL</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal notranslate"><span class="pre">martian-sdk-python/.env.template</span></code> for an example.</p>
+</li>
+</ol>
+</section>
+<section id="running-the-quickstart-notebook">
+<h2>Running the Quickstart Notebook<a class="headerlink" href="#running-the-quickstart-notebook" title="Link to this heading"></a></h2>
+<p>The SDK includes a Jupyter notebook that demonstrates key features and usage patterns:</p>
+<ol class="arabic">
+<li><p>From your hackathon parent directory, start Jupyter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+</li>
+<li><p>In Jupyter, navigate to <code class="docutils literal notranslate"><span class="pre">martian-sdk-python/quickstart_guide.ipynb</span></code></p></li>
+</ol>
+<p>The quickstart notebook will walk you through:</p>
+<ul class="simple">
+<li><p>Setting up the Martian client</p></li>
+<li><p>Using the gateway to access various LLM models</p></li>
+<li><p>Creating and using judges</p></li>
+<li><p>Working with routers</p></li>
+<li><p>Training and evaluating models</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>ImportError: No module named ‘martian_apart_hack_sdk’</strong></p>
+<ul class="simple">
+<li><p>Make sure you’ve installed the package with <cite>-e</cite> flag</p></li>
+<li><p>Check your virtual environment is activated</p></li>
+<li><p>Verify the installation directory is in your Python path</p></li>
+</ul>
+</li>
+<li><p><strong>Authentication Errors</strong></p>
+<ul class="simple">
+<li><p>Verify your API key is correct in the <cite>.env</cite> file</p></li>
+<li><p>Check your API URL is correct</p></li>
+<li><p>Ensure your environment variables are being loaded</p></li>
+</ul>
+</li>
+<li><p><strong>Virtual Environment Issues</strong></p>
+<ul class="simple">
+<li><p>Make sure you’re using the correct Python version (3.9 or higher)</p></li>
+<li><p>Ensure <cite>uv</cite> is installed and up to date</p></li>
+<li><p>Try recreating the virtual environment if issues persist</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Martian Python SDK" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/martian_client.html" class="btn btn-neutral float-right" title="MartianClient" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

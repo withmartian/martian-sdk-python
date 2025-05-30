@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>martian_apart_hack_sdk.backend_clients.routers &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/router.html">Router</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">martian_apart_hack_sdk.backend_clients.routers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for martian_apart_hack_sdk.backend_clients.routers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Router API client functions.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceNotFoundError</span><span class="p">,</span> <span class="n">ResourceAlreadyExistsError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">router</span> <span class="k">as</span> <span class="n">router_resource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.models.RouterConstraints</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoutingConstraint</span><span class="p">,</span> <span class="n">render_extra_body_router_constraint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.resources.judge</span><span class="w"> </span><span class="kn">import</span> <span class="n">Judge</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.resources.router</span><span class="w"> </span><span class="kn">import</span> <span class="n">Router</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">martian_apart_hack_sdk.models.RouterTrainingJob</span><span class="w"> </span><span class="kn">import</span> <span class="n">RouterTrainingJob</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai.resources.chat.completions</span><span class="w"> </span><span class="kn">import</span> <span class="n">completions</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RoutersClient">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RoutersClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The client for the Martian Routers API. Use the RoutersClient to create, update, and list routers.</span>
+
+<span class="sd">    Normally, you don&#39;t need to create a RoutersClient directly. Instead, use the MartianClient.routers property to access the RoutersClient.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        httpx (httpx.Client): The HTTP client to use for the API.</span>
+<span class="sd">        config (utils.ClientConfig): The configuration for the API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">httpx</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">utils</span><span class="o">.</span><span class="n">ClientConfig</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_router</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">router_resource</span><span class="o">.</span><span class="n">Router</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">],</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span>
+            <span class="n">createTime</span><span class="o">=</span><span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;createTime&quot;</span><span class="p">],</span>
+            <span class="n">routerSpec</span><span class="o">=</span><span class="n">json_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;routerSpec&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_router_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/routers/</span><span class="si">{</span><span class="n">router_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_router_spec_payload</span><span class="p">(</span><span class="n">router_spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;routerSpec&quot;</span><span class="p">:</span> <span class="n">router_spec</span><span class="p">}</span>
+
+<div class="viewcode-block" id="RoutersClient.create_router">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.create_router">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_router</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">router_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">base_model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">router_resource</span><span class="o">.</span><span class="n">Router</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a router.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            router_id (str): An arbitrary identifier (chosen by you) for the router. You&#39;ll need to use this identifier to reference the router in other API calls.</span>
+<span class="sd">            base_model (str): The initial model the router will use. The router will only route to this model until it is trained with additional models using run_training_job.</span>
+<span class="sd">            description (Optional[str], optional): The description of the router, for your own reference.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            router_resource.Router: The newly created router resource.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            When first created, a router only routes to its base_model. To enable routing between multiple models,</span>
+<span class="sd">            you must train the router using run_training_job with a list of models to include.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceAlreadyExistsError: If a router with the given ID already exists.</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_router_exists</span><span class="p">(</span><span class="n">router_id</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ResourceAlreadyExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Router with id </span><span class="si">{</span><span class="n">router_id</span><span class="si">}</span><span class="s2"> already exists&quot;</span><span class="p">)</span>
+        <span class="n">router_spec</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_executor</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_model_executor</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_router_spec_payload</span><span class="p">(</span><span class="n">router_spec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;routerId&quot;</span><span class="p">:</span> <span class="n">router_id</span><span class="p">}</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/routers&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_router</span><span class="p">(</span><span class="n">json_data</span><span class="o">=</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_model_executor</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;point&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;executor&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;spec&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;executor_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ModelExecutor&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">base_model</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="RoutersClient.update_router">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.update_router">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_router</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">router_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">router_spec</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+            <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">router_resource</span><span class="o">.</span><span class="n">Router</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update an existing router&#39;s specification and/or description.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            router_id (str): The ID of the router to update.</span>
+<span class="sd">            router_spec (Dict[str, Any]): The new router specification.</span>
+<span class="sd">            description (Optional[str], optional): Optional new description for the router.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            router_resource.Router: The updated Router resource.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Router updates are non-destructive. The updated router will have an incremented version number.</span>
+<span class="sd">            You can use this version number to reference the router in other API calls.</span>
+<span class="sd">            You can also access previous versions of the router by passing the previous version number to the `get` method.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceNotFoundError: If the router doesn&#39;t exist.</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_router_exists</span><span class="p">(</span><span class="n">router_id</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Router with id </span><span class="si">{</span><span class="n">router_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_router_spec_payload</span><span class="p">(</span><span class="n">router_spec</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/routers/</span><span class="si">{</span><span class="n">router_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_router</span><span class="p">(</span><span class="n">json_data</span><span class="o">=</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.list">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">router_resource</span><span class="o">.</span><span class="n">Router</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all routers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[router_resource.Router]: A list of all available routers.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/routers&quot;</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_router</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;routers&quot;</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.get">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">router_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Router</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a specific router by ID and optionally version.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            router_id (str): The ID of the router to retrieve.</span>
+<span class="sd">            version (Optional[int], optional): The specific version of the router to retrieve. If not provided, the latest version will be returned.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            router_resource.Router: The router resource. OR None if the router does not exist.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            httpx.HTTPError: If the request fails for reasons other than a missing router.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span> <span class="k">if</span> <span class="n">version</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/routers/</span><span class="si">{</span><span class="n">router_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_router</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.run">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">router</span><span class="p">:</span> <span class="n">Router</span><span class="p">,</span>
+        <span class="n">routing_constraint</span><span class="p">:</span> <span class="n">RoutingConstraint</span><span class="p">,</span>
+        <span class="n">completion_request</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">completions</span><span class="o">.</span><span class="n">ChatCompletion</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a router with the given constraints and completion request.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            router_id (str): The ID of the router to run.</span>
+<span class="sd">            routing_constraint (RoutingConstraint): The routing constraints to apply.</span>
+<span class="sd">            completion_request (Dict[str, Any]): The completion request parameters.</span>
+<span class="sd">            version (Optional[int], optional): Optional router version to use.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The router&#39;s response string.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceNotFoundError: If the router doesn&#39;t exist.</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_router_exists</span><span class="p">(</span><span class="n">router</span><span class="o">.</span><span class="n">id</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Router with id </span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+
+        <span class="n">openai_client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">openai_api_url</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">extra_body</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="n">render_extra_body_router_constraint</span><span class="p">(</span><span class="n">routing_constraint</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">version_to_use</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="k">elif</span> <span class="n">router</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">version_to_use</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">version</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">version_to_use</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">openai_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="o">**</span><span class="n">completion_request</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">router</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">{</span><span class="n">version_to_use</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+            <span class="n">extra_body</span><span class="o">=</span><span class="n">extra_body</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">evaluation_timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.run_training_job">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.run_training_job">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_training_job</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">router</span><span class="p">:</span> <span class="n">Router</span><span class="p">,</span>
+        <span class="n">judge</span><span class="p">:</span> <span class="n">Judge</span><span class="p">,</span>
+        <span class="n">llms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">requests</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RouterTrainingJob</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train a router to intelligently route between multiple models.</span>
+
+<span class="sd">        After training, the router will be able to route between any of the models specified in the llms parameter,</span>
+<span class="sd">        based on the quality vs latency preferences specified in routing constraints.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            router (Router): The router to train.</span>
+<span class="sd">            judge (Judge): The judge to use for evaluation.</span>
+<span class="sd">            llms (List[str]): List of model names to include in routing decisions. After training, the router will only be able to route between these models.</span>
+<span class="sd">                You can use predefined model sets from martian_apart_hack_sdk.models.llm_models (e.g., ANTHROPIC_MODELS, OPENAI_MODELS, ALL_MODELS).</span>
+<span class="sd">            requests (List[Dict[str, Any]]): List of request objects containing messages for training.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            RouterTrainingJob: The training job response metadata.</span>
+
+<span class="sd">            Note: The response metadata contains information about the training job itself,</span>
+<span class="sd">            but does not contain any information about the results of training or router configuration.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceNotFoundError: If the router or judge doesn&#39;t exist.</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            Create a judge and router, then train the router with multiple models:</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from martian_apart_hack_sdk.models.llm_models import ANTHROPIC_MODELS, OPENAI_MODELS</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Create a basic judge that evaluates response quality</span>
+<span class="sd">            &gt;&gt;&gt; judge_spec = RubricJudgeSpec(</span>
+<span class="sd">            ...     model_type=&quot;rubric_judge&quot;,</span>
+<span class="sd">            ...     model=&quot;gpt-4&quot;,</span>
+<span class="sd">            ...     rubric=&quot;Rate the response quality from 1-10 based on accuracy and completeness.&quot;,</span>
+<span class="sd">            ...     min_score=1,</span>
+<span class="sd">            ...     max_score=10</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; judge = client.judges.create(&quot;quality_judge&quot;, judge_spec)</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Create a router (initially only routes to base_model)</span>
+<span class="sd">            &gt;&gt;&gt; router = client.routers.create(</span>
+<span class="sd">            ...     router_id=&quot;test_router&quot;,</span>
+<span class="sd">            ...     base_model=&quot;anthropic/anthropic/claude-3-opus-latest&quot;</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Example training requests</span>
+<span class="sd">            &gt;&gt;&gt; requests = [</span>
+<span class="sd">            ...     {</span>
+<span class="sd">            ...         &quot;messages&quot;: [</span>
+<span class="sd">            ...             {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is Python?&quot;}</span>
+<span class="sd">            ...         ]</span>
+<span class="sd">            ...     },</span>
+<span class="sd">            ...     {</span>
+<span class="sd">            ...         &quot;messages&quot;: [</span>
+<span class="sd">            ...             {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are a machine learning expert who explains concepts clearly and concisely.&quot;},</span>
+<span class="sd">            ...             {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Explain machine learning.&quot;}</span>
+<span class="sd">            ...         ]</span>
+<span class="sd">            ...     }</span>
+<span class="sd">            ... ]</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Train the router with multiple models</span>
+<span class="sd">            &gt;&gt;&gt; training_job = client.routers.run_training_job(</span>
+<span class="sd">            ...     router=router,</span>
+<span class="sd">            ...     judge=judge,</span>
+<span class="sd">            ...     llms=list(ANTHROPIC_MODELS | OPENAI_MODELS),  # Train on all Anthropic and OpenAI models</span>
+<span class="sd">            ...     requests=requests</span>
+<span class="sd">            ... )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;routerName&quot;</span><span class="p">:</span> <span class="n">router</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;judgeName&quot;</span><span class="p">:</span> <span class="n">judge</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;llms&quot;</span><span class="p">:</span> <span class="n">llms</span><span class="p">,</span>
+            <span class="s2">&quot;requests&quot;</span><span class="p">:</span> <span class="n">requests</span>
+        <span class="p">}</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/router_training_jobs&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">RouterTrainingJob</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Started training job </span><span class="si">%s</span><span class="s2"> for router </span><span class="si">%s</span><span class="s2"> with judge </span><span class="si">%s</span><span class="s2"> and LLMs: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">router</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">judge</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">llms</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">job</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.wait_training_job">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.wait_training_job">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wait_training_job</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">job_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">poll_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">poll_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="mi">60</span>  <span class="c1"># 20 minutes in seconds</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RouterTrainingJob</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Poll a training job until it completes or fails.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            job_name (str): The job name or ID. If it contains &#39;/&#39; it&#39;s treated as a full name</span>
+<span class="sd">                (e.g. &#39;organizations/org-name/router_training_jobs/job-id&#39;) and the last part is used as ID.</span>
+<span class="sd">            poll_interval (int, optional): Number of seconds to wait between polls. Defaults to 10.</span>
+<span class="sd">            poll_timeout (int, optional): Maximum time to poll in seconds. Defaults to 1200 (20 minutes).</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            RouterTrainingJob: The final training job state. Check the `status` field to determine</span>
+<span class="sd">                if the job completed successfully (&quot;SUCCESS&quot;) or failed (&quot;FAILURE&quot;, &quot;FAILURE_WITHOUT_RETRY&quot;).</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            httpx.HTTPError: If any API request fails.</span>
+<span class="sd">            TimeoutError: If the job doesn&#39;t complete within the poll_timeout period.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; # Start a training job</span>
+<span class="sd">            &gt;&gt;&gt; training_job = client.routers.run_training_job(...)</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; # Poll until completion</span>
+<span class="sd">            &gt;&gt;&gt; final_job = client.routers.poll_training_job(</span>
+<span class="sd">            ...     job_name=training_job.name,</span>
+<span class="sd">            ...     poll_interval=15,    # Check every 15 seconds</span>
+<span class="sd">            ...     poll_timeout=600     # Wait up to 10 minutes</span>
+<span class="sd">            ... )</span>
+<span class="sd">            &gt;&gt;&gt; </span>
+<span class="sd">            &gt;&gt;&gt; if final_job.status == &quot;SUCCESS&quot;:</span>
+<span class="sd">            ...     print(&quot;Training completed successfully!&quot;)</span>
+<span class="sd">            ... else:</span>
+<span class="sd">            ...     print(f&quot;Training failed with status: {final_job.status}&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract job ID from full name if needed</span>
+        <span class="n">job_id</span> <span class="o">=</span> <span class="n">job_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">job_name</span> <span class="k">else</span> <span class="n">job_name</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="n">timeout_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">poll_timeout</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;</span> <span class="n">timeout_time</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training job </span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s2"> did not complete within </span><span class="si">{</span><span class="n">poll_timeout</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+
+            <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_training_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training job </span><span class="si">%s</span><span class="s2"> status: </span><span class="si">%s</span><span class="s2"> (elapsed: </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;FAILURE_WITHOUT_RETRY&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Job failed. All attempts have been exhausted.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SUCCESS&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILURE_WITHOUT_RETRY&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILURE&quot;</span><span class="p">]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training job </span><span class="si">%s</span><span class="s2"> completed with status: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">job</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll_interval</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RoutersClient.poll_training_job">
+<a class="viewcode-back" href="../../../api/routers_client.html#martian_apart_hack_sdk.backend_clients.routers.RoutersClient.poll_training_job">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">poll_training_job</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">job_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RouterTrainingJob</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current status of a training job.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            job_name (str): The job name or ID. If it contains &#39;/&#39; it&#39;s treated as a full name</span>
+<span class="sd">                (e.g. &#39;organizations/org-name/router_training_jobs/job-id&#39;) and the last part is used as ID.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            RouterTrainingJob: The current state of the training job. Check the `status` field to determine</span>
+<span class="sd">                if the job is still running (&quot;RUNNING&quot;), completed successfully (&quot;SUCCESS&quot;), </span>
+<span class="sd">                or failed (&quot;FAILURE&quot;, &quot;FAILURE_WITHOUT_RETRY&quot;).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceNotFoundError: If the training job doesn&#39;t exist.</span>
+<span class="sd">            httpx.HTTPError: If the request fails.</span>
+<span class="sd">            httpx.TimeoutException: If the request times out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">job_id</span> <span class="o">=</span> <span class="n">job_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">job_name</span> <span class="k">else</span> <span class="n">job_name</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/router_training_jobs/</span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">RouterTrainingJob</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span></div>
+</div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

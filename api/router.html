@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Router &mdash; Martian SDK 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Routing Constraints" href="routing_constraints.html" />
+    <link rel="prev" title="RoutersClient" href="routers_client.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Martian SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="martian_client.html">MartianClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge_specs.html">Judge Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judges_client.html">JudgesClient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="judge.html">Judge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routers_client.html">RoutersClient</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Router</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router"><code class="docutils literal notranslate"><span class="pre">Router</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.id"><code class="docutils literal notranslate"><span class="pre">Router.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.version"><code class="docutils literal notranslate"><span class="pre">Router.version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.description"><code class="docutils literal notranslate"><span class="pre">Router.description</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.createTime"><code class="docutils literal notranslate"><span class="pre">Router.createTime</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.name"><code class="docutils literal notranslate"><span class="pre">Router.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.routerSpec"><code class="docutils literal notranslate"><span class="pre">Router.routerSpec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#martian_apart_hack_sdk.resources.router.Router.__post_init__"><code class="docutils literal notranslate"><span class="pre">Router.__post_init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="routing_constraints.html">Routing Constraints</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Martian SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Router</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/router.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="router">
+<h1>Router<a class="headerlink" href="#router" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">martian_apart_hack_sdk.resources.router.</span></span><span class="sig-name descname"><span class="pre">Router</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">createTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">routerSpec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/resources/router.html#Router"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router" title="Link to this definition"></a></dt>
+<dd><p>A Router resource representing a Martian router configuration.</p>
+<p>This class serves as the primary interface for router operations in the SDK.
+Router instances are returned by RouterClient methods (<cite>create_router</cite>, <cite>get</cite>, <cite>list</cite>)
+and are used as parameters for operations like running the router or creating training jobs.</p>
+<p>Router Lifecycle:</p>
+<ol class="arabic simple">
+<li><p>When first created, a router only routes to its base_model.</p></li>
+<li><p>To enable routing between multiple models, the router must be trained using run_training_job.</p></li>
+<li><p>After training, the router can intelligently route between any of the models it was trained on,
+based on quality vs latency preferences specified in routing constraints.</p></li>
+</ol>
+<p>Routers should not be created from this class. Instead, use the <cite>RouterClient</cite> to create and manage routers.</p>
+<p>The Router is immutable. You can not update it directly from instances of this class.
+Instead, use the <cite>RouterClient</cite> to update the router.
+Any updates create a new version of the router with an incremented version number.
+Previous versions remain accessible through the <cite>RouterClient.get()</cite> method.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.id" title="Link to this definition"></a></dt>
+<dd><p>The router’s identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.version">
+<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.version" title="Link to this definition"></a></dt>
+<dd><p>The router version number. Increments with each update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.description" title="Link to this definition"></a></dt>
+<dd><p>A human-readable description of the router’s purpose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.createTime">
+<span class="sig-name descname"><span class="pre">createTime</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.createTime" title="Link to this definition"></a></dt>
+<dd><p>When the router was created (RFC 3339 format).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.name" title="Link to this definition"></a></dt>
+<dd><p>The router’s full resource name (format: “organizations/{org}/routers/{router_id}”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.routerSpec">
+<span class="sig-name descname"><span class="pre">routerSpec</span></span><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.routerSpec" title="Link to this definition"></a></dt>
+<dd><p>The router’s configuration, including points and executors.
+After training, this includes configuration for routing between all models the router was trained on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While this class has public attributes, you typically won’t create Router instances directly.
+Instead, you’ll receive them from RouterClient methods and use them in other SDK operations.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>)</p></li>
+<li><p><strong>description</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>)</p></li>
+<li><p><strong>createTime</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>)</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>)</p></li>
+<li><p><strong>routerSpec</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="martian_apart_hack_sdk.resources.router.Router.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/martian_apart_hack_sdk/resources/router.html#Router.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#martian_apart_hack_sdk.resources.router.Router.__post_init__" title="Link to this definition"></a></dt>
+<dd><p>Extract the router ID from the full resource name and set the <cite>id</cite> field.</p>
+<p>The ID is taken from the last segment of the name path. For example, from
+“organizations/org-123/routers/my-router”, the ID would be “my-router”.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="routers_client.html" class="btn btn-neutral float-left" title="RoutersClient" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="routing_constraints.html" class="btn btn-neutral float-right" title="Routing Constraints" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Martian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
