@@ -1,30 +1,30 @@
 """Router training job model."""
 
-from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+import dataclasses
+import datetime as dt
+from typing import Any, Dict, List
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class RouterTrainingJob:
     """Represents a router training job response."""
-    
+
     name: str
     router_name: str
     judge_name: str
     judge_version: int
     status: str
-    create_time: datetime
-    update_time: datetime
+    create_time: dt.datetime
+    update_time: dt.datetime
     llms: List[str]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "RouterTrainingJob":
         """Create a RouterTrainingJob instance from a dictionary.
-        
+
         Args:
             data: Dictionary containing the training job data
-            
+
         Returns:
             RouterTrainingJob instance
         """
@@ -36,5 +36,5 @@ class RouterTrainingJob:
             status=data["status"],
             create_time=data["createTime"],
             update_time=data["updateTime"],
-            llms=data["llms"]
-        ) 
+            llms=data["llms"],
+        )

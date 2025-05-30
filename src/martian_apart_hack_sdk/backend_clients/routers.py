@@ -155,7 +155,7 @@ class RoutersClient:
         resp.raise_for_status()
         return [self._init_router(j) for j in resp.json()["routers"]]
 
-    def get(self, router_id: str, version=None) -> Optional[Router]:
+    def get(self, router_id: str, version=None) -> Router:
         """Get a specific router by ID and optionally version.
 
         Args:
@@ -166,13 +166,18 @@ class RoutersClient:
             router_resource.Router: The router resource. OR None if the router does not exist.
 
         Raises:
+            ResourceNotFoundError: If the router doesn't exist.
             httpx.HTTPError: If the request fails for reasons other than a missing router.
             httpx.TimeoutException: If the request times out.
         """
         params = dict(version=version) if version else None
         resp = self.httpx.get(f"/routers/{router_id}", params=params)
+
         if resp.status_code == 404:
-            return None
+            raise exceptions.ResourceNotFoundError(
+                f"Router with id {router_id} not found"
+            )
+
         resp.raise_for_status()
         return self._init_router(resp.json())
 
