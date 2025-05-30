@@ -80,11 +80,6 @@ The quickstart guide will walk you through:
 - Training and evaluating models
 
 
-## Running Tests
+## SDK Reference Docs
 
-To run the demo test, from the SDK directory:
-```bash
-cd martian-sdk-python
-uv sync
-uv run -m demo.main
-```
+For more details, [check out the Martian Python SDK Documentation](https://withmartian.github.io/martian-sdk-python/)
