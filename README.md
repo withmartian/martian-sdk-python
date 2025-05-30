@@ -1,5 +1,7 @@
 # Martian Python SDK
 
+[SDK Documentation](https://withmartian.github.io/martian-sdk-python/)
+
 The Martian Python SDK provides a simple interface to manage judges and routers for LLM evaluation and routing. This SDK allows you to create, update, and manage judges for evaluating LLM responses, as well as routers for directing traffic between different models.
 
 ## Quick Start
