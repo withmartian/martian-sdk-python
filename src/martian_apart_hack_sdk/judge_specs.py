@@ -146,7 +146,9 @@ class ExactMatchJudgeSpec:
             Dict[str, Any]: A dictionary containing all attributes of this specification,
                 ready to be sent to the API.
         """
-        return dataclasses.asdict(self)
+        result = dataclasses.asdict(self)
+        # Filter out None values.
+        return {k: v for k, v in result.items() if v is not None}
 
 
 # JudgeSpec is a Union type that can be either RubricJudgeSpec or ExactMatchJudgeSpec
