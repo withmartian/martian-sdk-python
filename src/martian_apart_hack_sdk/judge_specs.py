@@ -1,7 +1,7 @@
 """Specifications for judges."""
 
 import dataclasses
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 
 @dataclasses.dataclass(frozen=True)
@@ -113,6 +113,43 @@ class RubricJudgeSpec:
         return {k: v for k, v in result.items() if v is not None}
 
 
-# For backward compatibility and future extensibility, JudgeSpec is an alias for RubricJudgeSpec.
-# If we add other types of judges in the future, this will become a Union type.
-JudgeSpec = RubricJudgeSpec
+@dataclasses.dataclass(frozen=True)
+class ExactMatchJudgeSpec:
+    """A specification for an exact match judge that evaluates submissions by comparing them against known answers.
+
+    This class defines the configuration for a judge that checks if the submission exactly matches
+    any of the provided known answers. This is useful for cases where there are specific correct
+    answers that should be matched exactly.
+
+    When evaluating a submission, the judge will:
+    - Return a score of 1.0 if the submission exactly matches any of the known answers
+    - Return a score of 0.0 if the submission does not match any of the known answers
+
+    Args:
+        model_type (Literal["exact_match_judge"]): The type of judge, must be "exact_match_judge".
+        known_answers (List[str]): A list of acceptable answers that the submission can match against.
+
+    Examples:
+        >>> exact_match_judge_spec = ExactMatchJudgeSpec(
+        ...     model_type="exact_match_judge",
+        ...     known_answers=["Paris", "Paris is the capital of France"]
+        ... )
+    """
+    model_type: Literal["exact_match_judge"]
+    known_answers: List[str]
+    extract_response: Optional[Dict[str, Any]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the judge specification to a dictionary format suitable for API requests.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing all attributes of this specification,
+                ready to be sent to the API.
+        """
+        return dataclasses.asdict(self)
+
+
+# JudgeSpec is a Union type that can be either RubricJudgeSpec or ExactMatchJudgeSpec
+JudgeSpec = Union[RubricJudgeSpec, ExactMatchJudgeSpec]
+
+
